@@ -1,0 +1,27 @@
+# This is an example mods.toml file. It contains the data relating to the loading mods.
+# There are several mandatory fields (#mandatory), and many more that are optional (#optional).
+# The overall format is standard TOML format, v0.5.0.
+# Note that there are a couple of TOML lists in this file.
+# Find more information on toml format here:  https://github.com/toml-lang/toml
+# The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
+modLoader="javafml"
+loaderVersion="${fml_range}"
+license="GPL 3.0"
+issueTrackerURL="https://github.com/ldtteam/minecolonies/issues/new/choose"
+[[mods]]
+modId="${modId}"
+version="${version}"
+displayName="${modBaseName}"
+displayURL="${projectUrl}"
+#logoFile="minecolonies_logo.png"
+credits="All the coffees!"
+authors="LDT Team"
+description='''
+Buildserver Actions is a tool which gives non OP's easy access to certain commands like changing their gamemode, movement speed, time of day, etc.
+'''
+[[dependencies.${modId}]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forge_range}"
+    ordering="NONE"
+    side="BOTH"

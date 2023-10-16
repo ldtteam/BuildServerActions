@@ -1,0 +1,4 @@
+project.ext.customChangelogHeader = "\n" +
+        "### Optional Dependencies\n" +
+        "- BlockUI: ${project.blockUI_version} (or above)\n" +
+        "\n"

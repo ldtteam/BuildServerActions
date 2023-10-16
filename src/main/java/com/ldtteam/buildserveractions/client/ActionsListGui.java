@@ -10,9 +10,11 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ActionsListGui
 {
-    private final ActionRenderLayout<?>      layout;
-    private final View                       root;
-    private       AbstractContainerScreen<?> screen;
+    private final AbstractContainerScreen<?> screen;
+
+    private final ActionRenderLayout<?> layout;
+
+    private final View root;
 
     public ActionsListGui(final AbstractContainerScreen<?> screen, final ActionRenderLayout<?> layout)
     {
@@ -22,10 +24,16 @@ public class ActionsListGui
         this.root = new View();
 
         final ImageRepeatable background = new ImageRepeatable();
+        background.setAlignment(layout.getWindowAlignment());
         background.setSize(50, 50);
         background.setImageLoc(new ResourceLocation(Constants.MOD_ID, "textures/gui/background.png"));
         background.setImageSize(0, 0, 18, 18, 6, 6, 6, 6);
         this.root.addChild(background);
+    }
+
+    public AbstractContainerScreen<?> getScreen()
+    {
+        return this.screen;
     }
 
     public View getRoot()
@@ -35,13 +43,9 @@ public class ActionsListGui
 
     public void draw(final PoseStack poseStack, final int mouseX, final int mouseY)
     {
-        this.root.setSize(screen.getXSize(), screen.getYSize());
-
-        final float guiScale = (float) screen.getMinecraft().getWindow().getGuiScale();
-
         poseStack.pushPose();
-        poseStack.translate(screen.getGuiLeft(), screen.getGuiTop(), 0);
-        poseStack.scale(guiScale, guiScale, 1);
+        poseStack.translate(this.screen.getGuiLeft(), this.screen.getGuiTop(), 0);
+        poseStack.translate(this.layout.getWidthOffset(this.screen), this.layout.getHeightOffset(this.screen), 0);
         this.root.draw(poseStack, mouseX, mouseY);
         this.root.drawLast(poseStack, mouseX, mouseY);
         poseStack.popPose();

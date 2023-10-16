@@ -38,7 +38,10 @@ public class ActionsListGuiEventHandler
     @SubscribeEvent
     public static void onScreenClosing(ScreenEvent.Closing event)
     {
-        currentGui = null;
+        if (currentGui != null && event.getScreen().equals(currentGui.getScreen()))
+        {
+            currentGui = null;
+        }
     }
 
     @SubscribeEvent

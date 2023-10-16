@@ -35,12 +35,12 @@ public class ActionsListGui
 
     public void draw(final PoseStack poseStack, final int mouseX, final int mouseY)
     {
-        this.root.setPosition(screen.getGuiLeft() - 50, screen.getGuiTop());
         this.root.setSize(screen.getXSize(), screen.getYSize());
 
         final float guiScale = (float) screen.getMinecraft().getWindow().getGuiScale();
 
         poseStack.pushPose();
+        poseStack.translate(screen.getGuiLeft(), screen.getGuiTop(), 0);
         poseStack.scale(guiScale, guiScale, 1);
         this.root.draw(poseStack, mouseX, mouseY);
         this.root.drawLast(poseStack, mouseX, mouseY);

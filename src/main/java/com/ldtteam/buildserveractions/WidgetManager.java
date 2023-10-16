@@ -3,10 +3,7 @@ package com.ldtteam.buildserveractions;
 import com.ldtteam.buildserveractions.widgets.Widget;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Manager class for all widgets.
@@ -35,6 +32,16 @@ public class WidgetManager
             instance = new WidgetManager();
         }
         return instance;
+    }
+
+    /**
+     * Obtain the map of widgets, grouped by their widget group.
+     *
+     * @return an unmodifiable map of the widgets.
+     */
+    public Map<ResourceLocation, List<Widget>> getWidgets()
+    {
+        return Collections.unmodifiableMap(widgetGroups);
     }
 
     /**

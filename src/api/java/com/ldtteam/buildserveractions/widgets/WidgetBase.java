@@ -2,6 +2,7 @@ package com.ldtteam.buildserveractions.widgets;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,4 +42,12 @@ public interface WidgetBase
      */
     @Nullable
     Component getDescription();
+
+    /**
+     * An item to display as the icon for this widget.
+     *
+     * @return the item stack.
+     */
+    @NotNull
+    ItemStack getIcon();
 }

@@ -11,6 +11,8 @@ import com.ldtteam.buildserveractions.widgets.NetworkWidget;
 import com.ldtteam.buildserveractions.widgets.PlayerGameTypeSwitchWidget;
 import com.ldtteam.buildserveractions.widgets.Widget;
 import com.ldtteam.buildserveractions.widgets.WidgetBase;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -48,10 +50,10 @@ public class BuildServerActions
      */
     private void registerDefaultWidgets(final BuildServerActionsCallbacks buildServerActionsCallbacks)
     {
-        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.SURVIVAL));
-        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.CREATIVE));
-        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.SPECTATOR));
-        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.ADVENTURE));
+        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.SURVIVAL, new ItemStack(Items.IRON_SWORD)));
+        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.CREATIVE, new ItemStack(Items.GRASS_BLOCK)));
+        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.SPECTATOR, new ItemStack(Items.ENDER_EYE)));
+        buildServerActionsCallbacks.registerWidget(new PlayerGameTypeSwitchWidget(GameType.ADVENTURE, new ItemStack(Items.MAP)));
     }
 
     /**

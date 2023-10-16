@@ -5,6 +5,7 @@ import com.ldtteam.buildserveractions.layouts.ActionRenderLayout;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * Handles all GUI events.
@@ -41,17 +42,6 @@ public class ActionsListGuiEventHandler
     }
 
     @SubscribeEvent
-    public static void onPreRender(ScreenEvent.Render.Pre event)
-    {
-        if (currentGui == null)
-        {
-            return;
-        }
-
-        currentGui.draw(event.getPoseStack(), event.getMouseX(), event.getMouseY());
-    }
-
-    @SubscribeEvent
     public static void onPostRender(ScreenEvent.Render.Post event)
     {
         if (currentGui == null)
@@ -59,6 +49,7 @@ public class ActionsListGuiEventHandler
             return;
         }
 
+        currentGui.draw(event.getPoseStack(), event.getMouseX(), event.getMouseY());
         currentGui.drawLast(event.getPoseStack(), event.getMouseX(), event.getMouseY());
     }
 
@@ -70,19 +61,14 @@ public class ActionsListGuiEventHandler
             return;
         }
 
-        if (event.getButton() == 1)
+        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_LEFT && (currentGui.getRoot().click(event.getMouseX(), event.getMouseY())))
         {
-            if (currentGui.getRoot().rightClick(event.getMouseX(), event.getMouseY()))
-            {
-                event.setCanceled(true);
-            }
+            event.setCanceled(true);
         }
-        else
+
+        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && (currentGui.getRoot().rightClick(event.getMouseX(), event.getMouseY())))
         {
-            if (currentGui.getRoot().click(event.getMouseX(), event.getMouseY()))
-            {
-                event.setCanceled(true);
-            }
+            event.setCanceled(true);
         }
     }
 }

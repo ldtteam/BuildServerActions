@@ -50,7 +50,6 @@ public class ActionsListGuiEventHandler
         }
 
         currentGui.draw(event.getPoseStack(), event.getMouseX(), event.getMouseY());
-        currentGui.drawLast(event.getPoseStack(), event.getMouseX(), event.getMouseY());
     }
 
     @SubscribeEvent

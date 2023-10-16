@@ -35,21 +35,11 @@ public class ActionsListGui
 
     public void draw(final PoseStack poseStack, final int mouseX, final int mouseY)
     {
-        this.root.setPosition(screen.getGuiLeft(), screen.getGuiTop());
+        this.root.setPosition(screen.getGuiLeft() - 50, screen.getGuiTop());
         this.root.setSize(screen.getXSize(), screen.getYSize());
 
-        poseStack.pushPose();
-        poseStack.translate(0, 0, -200);
         this.root.draw(poseStack, mouseX, mouseY);
-        poseStack.popPose();
-    }
-
-    public void drawLast(final PoseStack poseStack, final int mouseX, final int mouseY)
-    {
-        poseStack.pushPose();
-        poseStack.translate(0, 0, -200);
         this.root.drawLast(poseStack, mouseX, mouseY);
-        poseStack.popPose();
 
         this.root.onUpdate();
     }

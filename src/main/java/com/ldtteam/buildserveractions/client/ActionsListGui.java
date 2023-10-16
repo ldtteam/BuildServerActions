@@ -38,8 +38,13 @@ public class ActionsListGui
         this.root.setPosition(screen.getGuiLeft() - 50, screen.getGuiTop());
         this.root.setSize(screen.getXSize(), screen.getYSize());
 
+        final float guiScale = (float) screen.getMinecraft().getWindow().getGuiScale();
+
+        poseStack.pushPose();
+        poseStack.scale(guiScale, guiScale, 1);
         this.root.draw(poseStack, mouseX, mouseY);
         this.root.drawLast(poseStack, mouseX, mouseY);
+        poseStack.popPose();
 
         this.root.onUpdate();
     }

@@ -1,9 +1,13 @@
 package com.ldtteam.buildserveractions.client;
 
+import com.ldtteam.blockui.BOScreen;
 import com.ldtteam.buildserveractions.LayoutManager;
 import com.ldtteam.buildserveractions.layouts.ActionRenderLayout;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
@@ -11,8 +15,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class ActionsListGuiEventHandler
 {
-    private static ActionsListWindow currentGui;
-
     private ActionsListGuiEventHandler()
     {
     }
@@ -31,17 +33,28 @@ public class ActionsListGuiEventHandler
             return;
         }
 
-        currentGui = new ActionsListWindow(containerScreen, renderLayout);
-        currentGui.openAsLayer();
+        final ActionsListWindow currentGui = new ActionsListWindow(containerScreen, renderLayout);
+        event.addListener(currentGui.getScreen());
     }
 
     @SubscribeEvent
-    public static void onScreenClosing(ScreenEvent.Closing event)
+    public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        if (currentGui != null && event.getScreen().equals(currentGui.getScreen()))
+        if (!event.phase.equals(TickEvent.Phase.END) || !event.side.isClient())
         {
-            currentGui.close();
-            currentGui = null;
+            return;
+        }
+
+        final Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null)
+        {
+            for (GuiEventListener child : mc.screen.children())
+            {
+                if (child instanceof BOScreen attachedScreen)
+                {
+                    attachedScreen.tick();
+                }
+            }
         }
     }
 }

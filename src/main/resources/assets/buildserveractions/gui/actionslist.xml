@@ -1,5 +1,7 @@
-<view id="container">
+<window xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" pause="false"
+        lightbox="false"
+        xsi:noNamespaceSchemaLocation="file:../../../../../api/java/com/minecolonies/blockout/blockOut.xsd">
     <imagerepeat id="background" source="buildserveractions:textures/gui/background.png" textureoffset="0 0" texturesize="18 18" repeatoffset="6 6" repeatsize="6 6"/>
 
-    <switch id="pages"/>
-</view>
+    <switch id="pages" pos="6 16"/>
+</window>

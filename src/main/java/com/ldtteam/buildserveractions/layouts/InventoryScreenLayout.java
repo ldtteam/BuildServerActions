@@ -16,18 +16,12 @@ public class InventoryScreenLayout implements ActionRenderLayout<InventoryScreen
     @Override
     public Alignment getWindowAlignment()
     {
-        return Alignment.MIDDLE_RIGHT;
+        return Alignment.MIDDLE_LEFT;
     }
 
     @Override
     public int getWidthOffset(@NotNull final AbstractContainerScreen<?> screen)
     {
-        return -16;
-    }
-
-    @Override
-    public int getHeightOffset(final @NotNull AbstractContainerScreen<?> screen)
-    {
-        return screen.getYSize() / 2;
+        return -10;
     }
 }

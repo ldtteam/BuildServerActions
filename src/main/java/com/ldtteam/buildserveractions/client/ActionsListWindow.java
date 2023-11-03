@@ -30,6 +30,7 @@ public class ActionsListWindow extends BOWindow
     {
         super(new ResourceLocation(Constants.MOD_ID, "gui/actionslist.xml"));
 
+        this.screen = new AttachedScreen(this, attachedToScreen);
         this.windowPausesGame = attachedToScreen.isPauseScreen();
         this.lightbox = false;
 
@@ -92,6 +93,7 @@ public class ActionsListWindow extends BOWindow
         final int maxContainerWidth = WIDGET_SPACING + (widgetsInRow * WIDGET_OFFSET);
         final int maxContainerHeight = WIDGET_SPACING + (Math.min(widgetsInColumn, layout.getMaxButtonsInGroupBeforeScroll()) * WIDGET_OFFSET);
 
+        screen.resize(mc, maxContainerWidth, maxContainerHeight);
         setSize(maxContainerWidth, maxContainerHeight);
         background.setSize(maxContainerWidth, maxContainerHeight);
         pages.setSize(maxContainerWidth, maxContainerHeight);
@@ -126,15 +128,15 @@ public class ActionsListWindow extends BOWindow
         //}
     }
 
-    @Override
-    public void onOpened()
-    {
-        super.onOpened();
-    }
-
     private void onPageUpdate(final int pageId)
     {
         final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
         pages.setView("page" + pageId);
+    }
+
+    @Override
+    public void onOpened()
+    {
+        super.onOpened();
     }
 }

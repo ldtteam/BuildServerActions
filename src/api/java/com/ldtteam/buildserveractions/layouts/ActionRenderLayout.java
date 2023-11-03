@@ -8,6 +8,16 @@ public interface ActionRenderLayout<T extends AbstractContainerScreen<?>>
 {
     Class<T> getScreenClass();
 
+    default int getGroupsPerRow()
+    {
+        return 5;
+    }
+
+    default int getMaxButtonsInGroupBeforeScroll()
+    {
+        return 5;
+    }
+
     default Alignment getWindowAlignment()
     {
         return Alignment.TOP_LEFT;

@@ -6,7 +6,6 @@ import com.ldtteam.buildserveractions.widgets.NetworkWidget;
 import com.ldtteam.buildserveractions.widgets.Widget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +25,7 @@ public class NetworkWidgetWrapper implements Widget
     }
 
     @Override
-    public void handle(final Player player)
+    public void handle()
     {
         final IMessage message = wrappedWidget.createMessage();
         if (Objects.isNull(message.getExecutionSide()) || !message.getExecutionSide().isServer())

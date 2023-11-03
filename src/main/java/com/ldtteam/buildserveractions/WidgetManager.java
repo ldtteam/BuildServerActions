@@ -2,6 +2,7 @@ package com.ldtteam.buildserveractions;
 
 import com.ldtteam.buildserveractions.widgets.Widget;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -19,6 +20,11 @@ public class WidgetManager
      * The map of widgets, separated by widget group.
      */
     private final Map<ResourceLocation, List<Widget>> widgetGroups = new HashMap<>();
+
+    /**
+     * List of keys, sorted.
+     */
+    private final List<ResourceLocation> sortedKeys = new ArrayList<>();
 
     /**
      * Obtain the {@link WidgetManager} instance.
@@ -41,7 +47,45 @@ public class WidgetManager
      */
     public Map<ResourceLocation, List<Widget>> getWidgets()
     {
-        return Collections.unmodifiableMap(widgetGroups);
+        return Collections.unmodifiableMap(this.widgetGroups);
+    }
+
+    /**
+     * Obtain a widget group by its sorted index.
+     * This way there's no shifting in groups (which may happen with maps).
+     *
+     * @param index the widget group index.
+     * @return the list of widgets for this group, or null if bounds were exceeded.
+     */
+    @Nullable
+    public List<Widget> getWidgetGroup(final int index)
+    {
+        try
+        {
+            return this.widgetGroups.get(this.sortedKeys.get(index));
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Obtain a widget by its group and index.
+     *
+     * @param groupIndex the index of the group the widget is in.
+     * @param index      the index of the widget itself.
+     * @return the widget, or null.
+     */
+    @Nullable
+    public Widget getWidget(final int groupIndex, final int index)
+    {
+        final List<Widget> widgets = getWidgetGroup(groupIndex);
+        if (widgets == null)
+        {
+            return null;
+        }
+        return widgets.size() > index ? widgets.get(index) : null;
     }
 
     /**
@@ -53,5 +97,10 @@ public class WidgetManager
     {
         this.widgetGroups.putIfAbsent(widget.getGroupId(), new ArrayList<>());
         this.widgetGroups.get(widget.getGroupId()).add(widget);
+        if (!this.sortedKeys.contains(widget.getGroupId()))
+        {
+            this.sortedKeys.add(widget.getGroupId());
+        }
+        this.sortedKeys.sort(ResourceLocation::compareTo);
     }
 }

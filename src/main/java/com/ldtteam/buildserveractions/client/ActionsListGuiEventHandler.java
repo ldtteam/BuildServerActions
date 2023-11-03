@@ -5,21 +5,20 @@ import com.ldtteam.buildserveractions.layouts.ActionRenderLayout;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * Handles all GUI events.
  */
 public class ActionsListGuiEventHandler
 {
-    private static ActionsListGui currentGui;
+    private static ActionsListWindow currentGui;
 
     private ActionsListGuiEventHandler()
     {
     }
 
     @SubscribeEvent
-    public static void onScreenOpened(ScreenEvent.Opening event)
+    public static void onScreenOpened(ScreenEvent.Init.Post event)
     {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen))
         {
@@ -32,7 +31,8 @@ public class ActionsListGuiEventHandler
             return;
         }
 
-        currentGui = new ActionsListGui(containerScreen, renderLayout);
+        currentGui = new ActionsListWindow(containerScreen, renderLayout);
+        currentGui.openAsLayer();
     }
 
     @SubscribeEvent
@@ -40,37 +40,8 @@ public class ActionsListGuiEventHandler
     {
         if (currentGui != null && event.getScreen().equals(currentGui.getScreen()))
         {
+            currentGui.close();
             currentGui = null;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPostRender(ScreenEvent.Render.Post event)
-    {
-        if (currentGui == null)
-        {
-            return;
-        }
-
-        currentGui.draw(event.getPoseStack(), event.getMouseX(), event.getMouseY());
-    }
-
-    @SubscribeEvent
-    public static void onMouseClicked(ScreenEvent.MouseButtonReleased.Pre event)
-    {
-        if (currentGui == null)
-        {
-            return;
-        }
-
-        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_LEFT && (currentGui.getRoot().click(event.getMouseX(), event.getMouseY())))
-        {
-            event.setCanceled(true);
-        }
-
-        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && (currentGui.getRoot().rightClick(event.getMouseX(), event.getMouseY())))
-        {
-            event.setCanceled(true);
         }
     }
 }

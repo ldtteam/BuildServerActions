@@ -1,10 +1,13 @@
 package com.ldtteam.buildserveractions;
 
-import com.ldtteam.buildserveractions.widgets.Widget;
+import com.ldtteam.buildserveractions.registry.WidgetRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Manager class for all widgets.
@@ -17,14 +20,16 @@ public class WidgetManager
     private static WidgetManager instance;
 
     /**
-     * The map of widgets, separated by widget group.
+     * The forge registry containing all the widget groups.
      */
-    private final Map<ResourceLocation, List<Widget>> widgetGroups = new HashMap<>();
+    @Nullable
+    private IForgeRegistry<WidgetRegistries.WidgetGroup> widgetGroups;
 
     /**
-     * List of keys, sorted.
+     * The forge registry containing all the widgets.
      */
-    private final List<ResourceLocation> sortedKeys = new ArrayList<>();
+    @Nullable
+    private IForgeRegistry<WidgetRegistries.Widget> widgets;
 
     /**
      * Obtain the {@link WidgetManager} instance.
@@ -41,33 +46,53 @@ public class WidgetManager
     }
 
     /**
-     * Obtain the map of widgets, grouped by their widget group.
+     * Assign the widget group registry.
      *
-     * @return an unmodifiable map of the widgets.
+     * @param registry the registry.
      */
-    public Map<ResourceLocation, List<Widget>> getWidgets()
+    void setWidgetGroupRegistry(final IForgeRegistry<WidgetRegistries.WidgetGroup> registry)
     {
-        return Collections.unmodifiableMap(this.widgetGroups);
+        this.widgetGroups = registry;
     }
 
     /**
-     * Obtain a widget group by its sorted index.
-     * This way there's no shifting in groups (which may happen with maps).
+     * Assign the widget registry.
      *
-     * @param index the widget group index.
-     * @return the list of widgets for this group, or null if bounds were exceeded.
+     * @param registry the registry.
      */
-    @Nullable
-    public List<Widget> getWidgetGroup(final int index)
+    void setWidgetRegistry(final IForgeRegistry<WidgetRegistries.Widget> registry)
     {
-        try
+        this.widgets = registry;
+    }
+
+    /**
+     * Obtain the amount of widgets.
+     *
+     * @return the amount of widget groups.
+     */
+    public int getWidgetGroupCount()
+    {
+        if (this.widgetGroups == null)
         {
-            return this.widgetGroups.get(this.sortedKeys.get(index));
+            return 0;
         }
-        catch (Exception e)
+        return this.widgetGroups.getKeys().size();
+    }
+
+    /**
+     * Obtain the max amount of widgets in any group.
+     *
+     * @return the max amount of widgets in any group.
+     */
+    public int getMaxWidgetCountInGroup()
+    {
+        if (this.widgets == null)
         {
-            return null;
+            return 0;
         }
+        final Map<ResourceLocation, List<WidgetRegistries.Widget>> grouped = this.widgets.getValues().stream()
+                                                                               .collect(Collectors.groupingBy(WidgetRegistries.Widget::getGroupId));
+        return grouped.values().stream().mapToInt(List::size).max().orElse(0);
     }
 
     /**
@@ -78,29 +103,29 @@ public class WidgetManager
      * @return the widget, or null.
      */
     @Nullable
-    public Widget getWidget(final int groupIndex, final int index)
+    public WidgetRegistries.Widget getWidget(final int groupIndex, final int index)
     {
-        final List<Widget> widgets = getWidgetGroup(groupIndex);
-        if (widgets == null)
+        if (this.widgetGroups == null || this.widgets == null)
         {
             return null;
         }
-        return widgets.size() > index ? widgets.get(index) : null;
-    }
 
-    /**
-     * Adds a widget to the manager, may only be called internally.
-     *
-     * @param widget the new widget.
-     */
-    void addWidget(final Widget widget)
-    {
-        this.widgetGroups.putIfAbsent(widget.getGroupId(), new ArrayList<>());
-        this.widgetGroups.get(widget.getGroupId()).add(widget);
-        if (!this.sortedKeys.contains(widget.getGroupId()))
+        try
         {
-            this.sortedKeys.add(widget.getGroupId());
+            final ResourceLocation groupId = this.widgetGroups.getKeys().stream()
+                                               .sorted(ResourceLocation::compareTo)
+                                               .toList()
+                                               .get(groupIndex);
+            return this.widgets.getEntries().stream()
+                     .filter(f -> f.getKey().location().equals(groupId))
+                     .sorted(Map.Entry.comparingByKey())
+                     .toList()
+                     .get(index)
+                     .getValue();
         }
-        this.sortedKeys.sort(ResourceLocation::compareTo);
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 }

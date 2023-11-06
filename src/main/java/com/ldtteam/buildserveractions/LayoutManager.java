@@ -1,9 +1,8 @@
 package com.ldtteam.buildserveractions;
 
-import com.ldtteam.buildserveractions.layouts.ActionRenderLayout;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.ldtteam.buildserveractions.registry.WidgetRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Manager class for all layouts.
@@ -16,9 +15,10 @@ public class LayoutManager
     private static LayoutManager instance;
 
     /**
-     * The map of widgets, separated by widget group.
+     * The forge registry containing all the widget layouts.
      */
-    private final Map<Class<?>, ActionRenderLayout<?>> screenLayouts = new HashMap<>();
+    @Nullable
+    private IForgeRegistry<WidgetRegistries.WidgetLayout> widgetLayouts;
 
     /**
      * Obtain the {@link LayoutManager} instance.
@@ -35,13 +35,13 @@ public class LayoutManager
     }
 
     /**
-     * Register a layout for the given screen.
+     * Assign the widget group registry.
      *
-     * @param layout the layout specification.
+     * @param registry the registry.
      */
-    void registerLayout(final ActionRenderLayout<?> layout)
+    void setWidgetLayoutRegistry(final IForgeRegistry<WidgetRegistries.WidgetLayout> registry)
     {
-        this.screenLayouts.putIfAbsent(layout.getScreenClass(), layout);
+        this.widgetLayouts = registry;
     }
 
     /**
@@ -50,8 +50,13 @@ public class LayoutManager
      * @param layoutType the layout type.
      * @return the found layout specification, if any.
      */
-    public ActionRenderLayout<?> getLayout(Class<?> layoutType)
+    @Nullable
+    public WidgetRegistries.WidgetLayout getLayout(Class<?> layoutType)
     {
-        return this.screenLayouts.get(layoutType);
+        if (this.widgetLayouts == null)
+        {
+            return null;
+        }
+        return this.widgetLayouts.getValues().stream().filter(f -> f.getScreenClass().equals(layoutType)).findFirst().orElse(null);
     }
 }

@@ -3,10 +3,12 @@ package com.ldtteam.buildserveractions.registry;
 import com.ldtteam.blockui.Alignment;
 import com.ldtteam.blockui.util.records.SizeI;
 import com.ldtteam.buildserveractions.handlers.WidgetActionHandlers;
+import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
 import com.ldtteam.buildserveractions.util.Constants;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +30,7 @@ public class WidgetRegistriesInitializer
     public static final DeferredRegister<WidgetRegistries.WidgetGroup>  DEFERRED_GROUP_REGISTER  =
       DeferredRegister.create(new ResourceLocation(Constants.MOD_ID, "widget-groups"), Constants.MOD_ID);
     public static final DeferredRegister<WidgetRegistries.Widget>       DEFERRED_WIDGET_REGISTER =
-      DeferredRegister.create(new ResourceLocation(Constants.MOD_ID, "widget"), Constants.MOD_ID);
+      DeferredRegister.create(new ResourceLocation(Constants.MOD_ID, "widgets"), Constants.MOD_ID);
 
     /**
      * Register all widget layout entries.
@@ -40,7 +42,16 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.layoutSurvivalInventory = createLayoutEntry(id("layout-inv-survival"),
           InventoryScreen.class,
           builder -> builder.setAlignment(Alignment.MIDDLE_LEFT)
-                       .setOffset(new SizeI(-10, 0)));
+                       .setOffset(screen -> {
+                           SizeI size = new SizeI(-10, 0);
+                           if (screen instanceof InventoryScreen inventoryScreen && inventoryScreen.getRecipeBookComponent().isVisible())
+                           {
+                               final SizeI.MutableSizeI mutable = size.toMutable();
+                               mutable.width -= RecipeBookComponent.IMAGE_WIDTH;
+                               size = mutable.toImmutable();
+                           }
+                           return size;
+                       }));
 
         WidgetRegistries.layoutCreativeInventory =
           createLayoutEntry(id("layout-inv-creative"),
@@ -56,7 +67,13 @@ public class WidgetRegistriesInitializer
     {
         DEFERRED_GROUP_REGISTER.register(eventBus);
 
-        WidgetRegistries.groupGamemodes = createGroupEntry(id("group-game-modes"));
+        WidgetRegistries.groupGamemodes = createGroupEntry(id("group-game-modes"),
+          builder ->
+            builder.setSorter(new WidgetActionHandlers.GameModeSorter()));
+
+        WidgetRegistries.groupTime = createGroupEntry(id("group-time"),
+          builder ->
+            builder.setSorter(new WidgetActionHandlers.GameModeSorter()));
     }
 
     /**
@@ -66,33 +83,45 @@ public class WidgetRegistriesInitializer
     {
         DEFERRED_WIDGET_REGISTER.register(eventBus);
 
-        WidgetRegistries.gamemodeSurvivalWidget = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
+        WidgetRegistries.widgetGamemodeSurvival = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-survival"),
           builder -> builder.setName(GameType.SURVIVAL.getLongDisplayName())
                        .setDescription(Component.translatable("commands.gamemode.success.self", GameType.SURVIVAL.getLongDisplayName()))
                        .setIcon(new ItemStack(Items.IRON_SWORD))
                        .setHandler(WidgetActionHandlers.switchGameMode(GameType.SURVIVAL)));
 
-        WidgetRegistries.gamemodeCreativeWidget = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
+        WidgetRegistries.widgetGamemodeCreative = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-creative"),
           builder -> builder.setName(GameType.CREATIVE.getLongDisplayName())
                        .setDescription(Component.translatable("commands.gamemode.success.self", GameType.CREATIVE.getLongDisplayName()))
                        .setIcon(new ItemStack(Items.GRASS_BLOCK))
                        .setHandler(WidgetActionHandlers.switchGameMode(GameType.CREATIVE)));
 
-        WidgetRegistries.gamemodeSpectatorWidget = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
+        WidgetRegistries.widgetGamemodeSpectator = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-spectator"),
           builder -> builder.setName(GameType.SPECTATOR.getLongDisplayName())
                        .setDescription(Component.translatable("commands.gamemode.success.self", GameType.SPECTATOR.getLongDisplayName()))
                        .setIcon(new ItemStack(Items.ENDER_EYE))
                        .setHandler(WidgetActionHandlers.switchGameMode(GameType.SPECTATOR)));
 
-        WidgetRegistries.gamemodeAdventureWidget = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
+        WidgetRegistries.widgetGamemodeAdventure = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-adventure"),
           builder -> builder.setName(GameType.ADVENTURE.getLongDisplayName())
                        .setDescription(Component.translatable("commands.gamemode.success.self", GameType.ADVENTURE.getLongDisplayName()))
-                       .setIcon(new ItemStack(Items.GRASS_BLOCK))
+                       .setIcon(new ItemStack(Items.MAP))
                        .setHandler(WidgetActionHandlers.switchGameMode(GameType.ADVENTURE)));
+
+        WidgetRegistries.widgetTimeNoon = createWidgetEntry(WidgetRegistries.groupTime.getId(),
+          id("time-noon"),
+          builder -> builder.setName(Component.literal("Set time to noon"))
+                       .setIcon(ClockItemStackUtilities.createItemStack(0))
+                       .setHandler(WidgetActionHandlers.setTime(6000)));
+
+        WidgetRegistries.widgetTimeMidnight = createWidgetEntry(WidgetRegistries.groupTime.getId(),
+          id("time-midnight"),
+          builder -> builder.setName(Component.literal("Set time to midnight"))
+                       .setIcon(ClockItemStackUtilities.createItemStack(0.5f))
+                       .setHandler(WidgetActionHandlers.setTime(18000)));
     }
 
     /**
@@ -105,7 +134,7 @@ public class WidgetRegistriesInitializer
      */
     private static RegistryObject<WidgetRegistries.WidgetLayout> createLayoutEntry(
       final ResourceLocation layoutId,
-      final Class<? extends Screen> screenClass,
+      final Class<? extends AbstractContainerScreen<?>> screenClass,
       final Consumer<WidgetRegistries.WidgetLayout.Builder> builder)
     {
         final WidgetRegistries.WidgetLayout.Builder layout = new WidgetRegistries.WidgetLayout.Builder(screenClass);
@@ -119,10 +148,13 @@ public class WidgetRegistriesInitializer
      * @param groupId the id of the group.
      * @return the created registry object.
      */
-    private static RegistryObject<WidgetRegistries.WidgetGroup> createGroupEntry(final ResourceLocation groupId)
+    private static RegistryObject<WidgetRegistries.WidgetGroup> createGroupEntry(
+      final ResourceLocation groupId,
+      final Consumer<WidgetRegistries.WidgetGroup.Builder> builder)
     {
-        final WidgetRegistries.WidgetGroup group = new WidgetRegistries.WidgetGroup(groupId);
-        return DEFERRED_GROUP_REGISTER.register(groupId.getPath(), () -> group);
+        final WidgetRegistries.WidgetGroup.Builder group = new WidgetRegistries.WidgetGroup.Builder(groupId);
+        builder.accept(group);
+        return DEFERRED_GROUP_REGISTER.register(groupId.getPath(), group::build);
     }
 
     /**

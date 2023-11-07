@@ -15,11 +15,11 @@ public class BuildServerActions
      */
     public BuildServerActions()
     {
-        Network.getNetwork().registerCommonMessages();
-
         WidgetRegistriesInitializer.registerLayoutEntries(FMLJavaModLoadingContext.get().getModEventBus());
         WidgetRegistriesInitializer.registerGroupEntries(FMLJavaModLoadingContext.get().getModEventBus());
         WidgetRegistriesInitializer.registerWidgetEntries(FMLJavaModLoadingContext.get().getModEventBus());
+
+        Network.getNetwork().registerCommonMessages();
 
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().register(ActionsListGuiEventHandler.class);
         Mod.EventBusSubscriber.Bus.MOD.bus().get().register(EventManager.class);

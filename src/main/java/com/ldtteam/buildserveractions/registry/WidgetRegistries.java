@@ -2,7 +2,7 @@ package com.ldtteam.buildserveractions.registry;
 
 import com.ldtteam.blockui.Alignment;
 import com.ldtteam.blockui.util.records.SizeI;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -10,23 +10,29 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
  * All the registry information for managing widgets.
  */
+@SuppressWarnings({"java:S1104", "java:S1444"})
 public class WidgetRegistries
 {
     public static RegistryObject<WidgetLayout> layoutSurvivalInventory;
     public static RegistryObject<WidgetLayout> layoutCreativeInventory;
 
     public static RegistryObject<WidgetGroup> groupGamemodes;
+    public static RegistryObject<WidgetGroup> groupTime;
 
-    public static RegistryObject<Widget> gamemodeSurvivalWidget;
-    public static RegistryObject<Widget> gamemodeCreativeWidget;
-    public static RegistryObject<Widget> gamemodeSpectatorWidget;
-    public static RegistryObject<Widget> gamemodeAdventureWidget;
+    public static RegistryObject<Widget> widgetGamemodeSurvival;
+    public static RegistryObject<Widget> widgetGamemodeCreative;
+    public static RegistryObject<Widget> widgetGamemodeAdventure;
+    public static RegistryObject<Widget> widgetGamemodeSpectator;
+
+    public static RegistryObject<Widget> widgetTimeNoon;
+    public static RegistryObject<Widget> widgetTimeMidnight;
 
     /**
      * Widget layout registry instance.
@@ -36,7 +42,7 @@ public class WidgetRegistries
         /**
          * The class type of which screen the widget layout gets attached to.
          */
-        private final Class<? extends Screen> screenClass;
+        private final Class<? extends AbstractContainerScreen<?>> screenClass;
 
         /**
          * The maximum amount of button columns visible at once.
@@ -56,13 +62,13 @@ public class WidgetRegistries
         /**
          * An additional offset compared to the position where the window is aligned.
          */
-        private final Function<Screen, SizeI> offsetFunc;
+        private final Function<AbstractContainerScreen<?>, SizeI> offsetFunc;
 
         /**
          * Default internal constructor.
          */
         public WidgetLayout(
-          final Class<? extends Screen> screenClass, final int maxGroups, final int maxButtonsInGroup, final Alignment alignment, final Function<Screen, SizeI> offsetFunc)
+          final Class<? extends AbstractContainerScreen<?>> screenClass, final int maxGroups, final int maxButtonsInGroup, final Alignment alignment, final Function<AbstractContainerScreen<?>, SizeI> offsetFunc)
         {
             this.screenClass = screenClass;
             this.maxGroups = maxGroups;
@@ -74,7 +80,7 @@ public class WidgetRegistries
         /**
          * Get the class type of which screen the widget layout gets attached to.
          */
-        public Class<? extends Screen> getScreenClass()
+        public Class<? extends AbstractContainerScreen<?>> getScreenClass()
         {
             return screenClass;
         }
@@ -114,7 +120,7 @@ public class WidgetRegistries
          *
          * @return the selected offset.
          */
-        public Function<Screen, SizeI> getOffsetFunction()
+        public Function<AbstractContainerScreen<?>, SizeI> getOffsetFunction()
         {
             return offsetFunc;
         }
@@ -150,7 +156,7 @@ public class WidgetRegistries
             /**
              * The class type of which screen the widget layout gets attached to.
              */
-            private final Class<? extends Screen> screenClass;
+            private final Class<? extends AbstractContainerScreen<?>> screenClass;
 
             /**
              * The maximum amount of button columns visible at once.
@@ -170,14 +176,14 @@ public class WidgetRegistries
             /**
              * An additional offset compared to the position where the window is aligned.
              */
-            private Function<Screen, SizeI> offsetFunc = screen -> new SizeI(0, 0);
+            private Function<AbstractContainerScreen<?>, SizeI> offsetFunc = screen -> new SizeI(0, 0);
 
             /**
              * Default constructor.
              *
              * @param screenClass the class type of the window which to attach to.
              */
-            public Builder(final Class<? extends Screen> screenClass)
+            public Builder(final Class<? extends AbstractContainerScreen<?>> screenClass)
             {
                 this.screenClass = screenClass;
             }
@@ -241,7 +247,7 @@ public class WidgetRegistries
              * @param offsetFunc a function to determine the new offset.
              * @return builder for chaining.
              */
-            public Builder setOffset(final Function<Screen, SizeI> offsetFunc)
+            public Builder setOffset(final Function<AbstractContainerScreen<?>, SizeI> offsetFunc)
             {
                 this.offsetFunc = offsetFunc;
                 return this;
@@ -264,14 +270,43 @@ public class WidgetRegistries
      */
     public static class WidgetGroup
     {
+        /**
+         * The id of the group.
+         */
         private final ResourceLocation groupId;
+
+        /**
+         * The sorter for widget instances used for this group.
+         */
+        private final Comparator<Widget> widgetSorter;
 
         /**
          * Default internal constructor.
          */
-        public WidgetGroup(final ResourceLocation groupId)
+        public WidgetGroup(final ResourceLocation groupId, final Comparator<Widget> widgetSorter)
         {
             this.groupId = groupId;
+            this.widgetSorter = widgetSorter;
+        }
+
+        /**
+         * Get the id of the group.
+         *
+         * @return the resource id.
+         */
+        public ResourceLocation getId()
+        {
+            return groupId;
+        }
+
+        /**
+         * Get the sorter for widget instances used for this group.
+         *
+         * @return the comparator.
+         */
+        public Comparator<Widget> getWidgetSorter()
+        {
+            return widgetSorter;
         }
 
         @Override
@@ -295,6 +330,60 @@ public class WidgetRegistries
             final WidgetGroup that = (WidgetGroup) o;
 
             return groupId.equals(that.groupId);
+        }
+
+        /**
+         * Builder class for {@link WidgetLayout} instances.
+         */
+        public static class Builder
+        {
+            /**
+             * Default instance of the widget sorter.
+             */
+            private static final Comparator<Widget> DEFAULT_WIDGET_SORTER = Comparator.comparing(c -> c.widgetId);
+
+            /**
+             * The id of the group.
+             */
+            private final ResourceLocation groupId;
+
+            /**
+             * The sorter for widget instances used for this group.
+             */
+            private Comparator<Widget> widgetSorter = DEFAULT_WIDGET_SORTER;
+
+            /**
+             * Default constructor.
+             *
+             * @param groupId the id of the group.
+             */
+            public Builder(final ResourceLocation groupId)
+            {
+                this.groupId = groupId;
+            }
+
+            /**
+             * Set the comparator used for sorting the list of widgets.
+             * Defaults to a comparator that uses the widget id, alphabetically.
+             *
+             * @param widgetSorter the comparator.
+             * @return builder for chaining.
+             */
+            public Builder setSorter(final Comparator<Widget> widgetSorter)
+            {
+                this.widgetSorter = widgetSorter;
+                return this;
+            }
+
+            /**
+             * Finalize construction of the {@link WidgetGroup} instance.
+             *
+             * @return the instance.
+             */
+            public WidgetGroup build()
+            {
+                return new WidgetGroup(groupId, widgetSorter != null ? widgetSorter : DEFAULT_WIDGET_SORTER);
+            }
         }
     }
 

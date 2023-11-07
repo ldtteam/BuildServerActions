@@ -3,15 +3,22 @@ package com.ldtteam.buildserveractions.network;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
+import com.ldtteam.buildserveractions.network.messages.client.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.network.messages.splitting.SplitPacketMessage;
 import com.ldtteam.buildserveractions.util.Constants;
 import com.ldtteam.buildserveractions.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -32,9 +39,9 @@ public class NetworkChannel
     /**
      * A class that handles the data wrapping for our inner index codec.
      *
-     * @param <T> The message type.
+     * @param <MSG> The message type.
      */
-    public static final class NetworkingMessageEntry<T extends IMessage>
+    public static final class NetworkingMessageEntry<MSG extends IMessage>
     {
         /**
          * Atomic boolean that tracks if a splitting warning has been written to the log for a given packet type.
@@ -44,19 +51,16 @@ public class NetworkChannel
         /**
          * A callback to create a new message instance.
          */
-        private final Supplier<T> creator;
+        private final Supplier<MSG> creator;
 
-        private NetworkingMessageEntry(final Supplier<T> creator)
-        {
-            this.creator = creator;
-        }
+        private NetworkingMessageEntry(final Supplier<MSG> creator) {this.creator = creator;}
 
         /**
          * Gives access to the callback that creates a new message instance.
          *
          * @return The callback.
          */
-        public Supplier<T> getCreator()
+        public Supplier<MSG> getCreator()
         {
             return creator;
         }
@@ -85,35 +89,26 @@ public class NetworkChannel
     /**
      * Forge network channel
      */
-    private final SimpleChannel rawChannel;
-
+    private final SimpleChannel                           rawChannel;
     /**
      * The messages that this channel can process, as viewed from a message id.
      */
-    private final Map<Integer, NetworkingMessageEntry<?>> messagesTypes = Maps.newHashMap();
-
+    private final Map<Integer, NetworkingMessageEntry<?>> messagesTypes      = Maps.newHashMap();
     /**
      * The message that this channel can process, as viewed from a message type.
      */
     private final Map<Class<? extends IMessage>, Integer> messageTypeToIdMap = Maps.newHashMap();
-
     /**
-     * Cache of partially received messages, this holds the data until it is processed.
+     * Cache of partially received messages, this holds the data untill it is processed.
      */
-    private final Cache<Integer, Map<Integer, byte[]>> messageCache = CacheBuilder.newBuilder()
-                                                                        .expireAfterAccess(1, TimeUnit.MINUTES)
-                                                                        .concurrencyLevel(8)
-                                                                        .build();
-
+    private final Cache<Integer, Map<Integer, byte[]>>    messageCache       = CacheBuilder.newBuilder()
+                                                                                 .expireAfterAccess(1, TimeUnit.MINUTES)
+                                                                                 .concurrencyLevel(8)
+                                                                                 .build();
     /**
-     * An atomic counter which keeps track of the split messages that have been sent to somewhere from this network node.
+     * An atomic counter which keeps track of the split messages that have been send to somewhere from this network node.
      */
-    private final AtomicInteger messageCounter = new AtomicInteger();
-
-    /**
-     * Message ID counter.
-     */
-    private int nextMessageId = 0;
+    private final AtomicInteger                           messageCounter     = new AtomicInteger();
 
     /**
      * Creates a new instance of network channel.
@@ -133,20 +128,38 @@ public class NetworkChannel
      */
     public void registerCommonMessages()
     {
+        setupInternalMessages();
 
+        int idx = 0;
+        registerMessage(++idx, WidgetTriggerMessage.class, WidgetTriggerMessage::new);
+    }
+
+    private void setupInternalMessages()
+    {
+        rawChannel.registerMessage(0, SplitPacketMessage.class, IMessage::toBytes, (buf) -> {
+            final SplitPacketMessage msg = new SplitPacketMessage();
+            msg.fromBytes(buf);
+            return msg;
+        }, (msg, ctxIn) -> {
+            final net.minecraftforge.network.NetworkEvent.Context ctx = ctxIn.get();
+            final LogicalSide packetOrigin = ctx.getDirection().getOriginationSide();
+            ctx.setPacketHandled(true);
+            msg.onExecute(ctx, packetOrigin.equals(LogicalSide.CLIENT));
+        });
     }
 
     /**
      * Register a message into rawChannel.
      *
-     * @param <T>        message class type
+     * @param <MSG>      message class type
+     * @param id         network id
+     * @param msgClazz   message class
      * @param msgCreator supplier with new instance of msgClazz
      */
-    public <T extends IMessage> void registerMessage(final Supplier<T> msgCreator)
+    private <MSG extends IMessage> void registerMessage(final int id, final Class<MSG> msgClazz, final Supplier<MSG> msgCreator)
     {
-        this.messagesTypes.put(nextMessageId, new NetworkingMessageEntry<>(msgCreator));
-        this.messageTypeToIdMap.put(msgCreator.get().getClass(), nextMessageId);
-        this.nextMessageId++;
+        this.messagesTypes.put(id, new NetworkingMessageEntry<>(msgCreator));
+        this.messageTypeToIdMap.put(msgClazz, id);
     }
 
     /**
@@ -168,6 +181,48 @@ public class NetworkChannel
     public void sendToPlayer(final IMessage msg, final ServerPlayer player)
     {
         handleSplitting(msg, s -> rawChannel.send(PacketDistributor.PLAYER.with(() -> player), s));
+    }
+
+    /**
+     * Sends the message to the origin of a different message based on the networking context given.
+     *
+     * @param msg message to send
+     * @param ctx network context
+     */
+    public void sendToOrigin(final IMessage msg, final NetworkEvent.Context ctx)
+    {
+        final ServerPlayer player = ctx.getSender();
+        if (player != null) // side check
+        {
+            sendToPlayer(msg, player);
+        }
+        else
+        {
+            sendToServer(msg);
+        }
+    }
+
+    /**
+     * Sends to everyone in dimension.
+     *
+     * @param msg message to send
+     * @param dim target dimension
+     */
+    public void sendToDimension(final IMessage msg, final ResourceLocation dim)
+    {
+        rawChannel.send(PacketDistributor.DIMENSION.with(() -> ResourceKey.create(Registry.DIMENSION_REGISTRY, dim)), msg);
+    }
+
+    /**
+     * Sends to everyone in circle made using given target point.
+     *
+     * @param msg message to send
+     * @param pos target position and radius
+     * @see PacketDistributor.TargetPoint
+     */
+    public void sendToPosition(final IMessage msg, final net.minecraftforge.network.PacketDistributor.TargetPoint pos)
+    {
+        handleSplitting(msg, s -> rawChannel.send(PacketDistributor.NEAR.with(() -> pos), s));
     }
 
     /**
@@ -213,8 +268,7 @@ public class NetworkChannel
             final byte[] subPacketData = Arrays.copyOfRange(data, currentIndex, currentIndex + extra);
 
             //Construct the wrapping packet.
-            final SplitPacketMessage
-              splitPacketMessage = new SplitPacketMessage(comId, packetIndex++, (currentIndex + extra) >= data.length, messageId, subPacketData);
+            final SplitPacketMessage splitPacketMessage = new SplitPacketMessage(comId, packetIndex++, (currentIndex + extra) >= data.length, messageId, subPacketData);
 
             //Send the wrapping packet.
             splitMessageConsumer.accept(splitPacketMessage);
@@ -232,6 +286,61 @@ public class NetworkChannel
     public Map<Integer, NetworkingMessageEntry<?>> getMessagesTypes()
     {
         return messagesTypes;
+    }
+
+    /**
+     * Sends to everyone.
+     *
+     * @param msg message to send
+     */
+    public void sendToEveryone(final IMessage msg)
+    {
+        handleSplitting(msg, s -> rawChannel.send(PacketDistributor.ALL.noArg(), s));
+    }
+
+    /**
+     * Sends to everyone who is in range from entity's pos using formula below.
+     *
+     * <pre>
+     * Math.min(Entity.getType().getTrackingRange(), ChunkManager.this.viewDistance - 1) * 16;
+     * </pre>
+     * <p>
+     * as of 24-06-2019
+     *
+     * @param msg    message to send
+     * @param entity target entity to look at
+     */
+    public void sendToTrackingEntity(final IMessage msg, final Entity entity)
+    {
+        handleSplitting(msg, s -> rawChannel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), s));
+    }
+
+    /**
+     * Sends to everyone (including given entity) who is in range from entity's pos using formula below.
+     *
+     * <pre>
+     * Math.min(Entity.getType().getTrackingRange(), ChunkManager.this.viewDistance - 1) * 16;
+     * </pre>
+     * <p>
+     * as of 24-06-2019
+     *
+     * @param msg    message to send
+     * @param entity target entity to look at
+     */
+    public void sendToTrackingEntityAndSelf(final IMessage msg, final Entity entity)
+    {
+        handleSplitting(msg, s -> rawChannel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), s));
+    }
+
+    /**
+     * Sends to everyone in given chunk.
+     *
+     * @param msg   message to send
+     * @param chunk target chunk to look at
+     */
+    public void sendToTrackingChunk(final IMessage msg, final LevelChunk chunk)
+    {
+        handleSplitting(msg, s -> rawChannel.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), s));
     }
 
     /**

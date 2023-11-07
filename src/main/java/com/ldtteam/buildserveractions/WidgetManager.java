@@ -1,6 +1,8 @@
 package com.ldtteam.buildserveractions;
 
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
@@ -66,6 +68,38 @@ public class WidgetManager
     }
 
     /**
+     * Writes a widget
+     *
+     * @param buf network data byte buffer.
+     * @return the widget, or null if a problem occurred on the sending side.
+     */
+    public WidgetRegistries.Widget readWidgetFromBuffer(final FriendlyByteBuf buf)
+    {
+        if (buf.readBoolean())
+        {
+            return buf.readRegistryIdSafe(WidgetRegistries.Widget.class);
+        }
+        return null;
+    }
+
+    /**
+     * Writes a widget to a network data byte buffer.
+     *
+     * @param buf    network data byte buffer.
+     * @param widget the widget to write.
+     */
+    public void writeWidgetToBuffer(final FriendlyByteBuf buf, final WidgetRegistries.Widget widget)
+    {
+        if (this.widgets == null || widget == null)
+        {
+            buf.writeBoolean(false);
+            return;
+        }
+        buf.writeBoolean(true);
+        buf.writeRegistryId(this.widgets, widget);
+    }
+
+    /**
      * Obtain the amount of widgets.
      *
      * @return the amount of widget groups.
@@ -112,13 +146,14 @@ public class WidgetManager
 
         try
         {
-            final ResourceLocation groupId = this.widgetGroups.getKeys().stream()
-                                               .sorted(ResourceLocation::compareTo)
-                                               .toList()
-                                               .get(groupIndex);
+            final Map.Entry<ResourceKey<WidgetRegistries.WidgetGroup>, WidgetRegistries.WidgetGroup> group =
+              this.widgetGroups.getEntries().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .toList()
+                .get(groupIndex);
             return this.widgets.getEntries().stream()
-                     .filter(f -> f.getKey().location().equals(groupId))
-                     .sorted(Map.Entry.comparingByKey())
+                     .filter(f -> f.getValue().getGroupId().equals(group.getValue().getId()))
+                     .sorted((s1, s2) -> group.getValue().getWidgetSorter().compare(s1.getValue(), s2.getValue()))
                      .toList()
                      .get(index)
                      .getValue();

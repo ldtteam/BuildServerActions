@@ -1,0 +1,8 @@
+{
+  "com.ldtteam.buildserveractions.widgets.settime.6000": "Set time to noon",
+  "com.ldtteam.buildserveractions.widgets.settime.18000": "Set time to midnight",
+  "com.ldtteam.buildserveractions.widgets.flightspeed.1": "Set flight speed to default",
+  "com.ldtteam.buildserveractions.widgets.flightspeed.2": "Set flight speed to x2",
+  "com.ldtteam.buildserveractions.widgets.flightspeed.5": "Set flight speed to x5",
+  "com.ldtteam.buildserveractions.widgets.flightspeed.10": "Set flight speed to x10"
+}

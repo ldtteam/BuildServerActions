@@ -2,14 +2,17 @@ package com.ldtteam.buildserveractions.registry;
 
 import com.ldtteam.blockui.Alignment;
 import com.ldtteam.blockui.util.records.SizeI;
-import com.ldtteam.buildserveractions.handlers.WidgetActionHandlers;
+import com.ldtteam.buildserveractions.constants.Constants;
+import com.ldtteam.buildserveractions.handlers.FlightSpeedWidgetCallbacks;
+import com.ldtteam.buildserveractions.handlers.GameModeWidgetCallbacks;
+import com.ldtteam.buildserveractions.handlers.ItemWidgetCallbacks;
+import com.ldtteam.buildserveractions.handlers.SetTimeWidgetCallbacks;
 import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
-import com.ldtteam.buildserveractions.util.Constants;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -19,6 +22,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Consumer;
+
+import static com.ldtteam.buildserveractions.handlers.FlightSpeedWidgetCallbacks.FLIGHT_SPEED_MULTIPLIER_KEY;
+import static com.ldtteam.buildserveractions.handlers.GameModeWidgetCallbacks.WIDGET_GAME_MODE_KEY;
+import static com.ldtteam.buildserveractions.handlers.SetTimeWidgetCallbacks.TIME_KEY;
 
 /**
  * Initializer for all widget registry entries.
@@ -69,11 +76,13 @@ public class WidgetRegistriesInitializer
 
         WidgetRegistries.groupGamemodes = createGroupEntry(id("group-game-modes"),
           builder ->
-            builder.setSorter(new WidgetActionHandlers.GameModeSorter()));
+            builder.setSorter(new GameModeWidgetCallbacks.GameModeSorter()));
 
-        WidgetRegistries.groupTime = createGroupEntry(id("group-time"),
-          builder ->
-            builder.setSorter(new WidgetActionHandlers.GameModeSorter()));
+        WidgetRegistries.groupTime = createGroupEntry(id("group-time"), builder -> {});
+
+        WidgetRegistries.groupSpeed = createGroupEntry(id("group-speed"), builder -> {});
+
+        WidgetRegistries.groupItems = createGroupEntry(id("group-items"), builder -> {});
     }
 
     /**
@@ -85,43 +94,131 @@ public class WidgetRegistriesInitializer
 
         WidgetRegistries.widgetGamemodeSurvival = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-survival"),
-          builder -> builder.setName(GameType.SURVIVAL.getLongDisplayName())
-                       .setDescription(Component.translatable("commands.gamemode.success.self", GameType.SURVIVAL.getLongDisplayName()))
+          builder -> builder.setName(GameModeWidgetCallbacks::name)
+                       .setDescription(GameModeWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.IRON_SWORD))
-                       .setHandler(WidgetActionHandlers.switchGameMode(GameType.SURVIVAL)));
+                       .setHandler(GameModeWidgetCallbacks::handler)
+                       .addMetadata(WIDGET_GAME_MODE_KEY, GameType.SURVIVAL));
 
         WidgetRegistries.widgetGamemodeCreative = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-creative"),
-          builder -> builder.setName(GameType.CREATIVE.getLongDisplayName())
-                       .setDescription(Component.translatable("commands.gamemode.success.self", GameType.CREATIVE.getLongDisplayName()))
+          builder -> builder.setName(GameModeWidgetCallbacks::name)
+                       .setDescription(GameModeWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.GRASS_BLOCK))
-                       .setHandler(WidgetActionHandlers.switchGameMode(GameType.CREATIVE)));
+                       .setHandler(GameModeWidgetCallbacks::handler)
+                       .addMetadata(WIDGET_GAME_MODE_KEY, GameType.CREATIVE));
 
         WidgetRegistries.widgetGamemodeSpectator = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-spectator"),
-          builder -> builder.setName(GameType.SPECTATOR.getLongDisplayName())
-                       .setDescription(Component.translatable("commands.gamemode.success.self", GameType.SPECTATOR.getLongDisplayName()))
+          builder -> builder.setName(GameModeWidgetCallbacks::name)
+                       .setDescription(GameModeWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.ENDER_EYE))
-                       .setHandler(WidgetActionHandlers.switchGameMode(GameType.SPECTATOR)));
+                       .setHandler(GameModeWidgetCallbacks::handler)
+                       .addMetadata(WIDGET_GAME_MODE_KEY, GameType.SPECTATOR));
 
         WidgetRegistries.widgetGamemodeAdventure = createWidgetEntry(WidgetRegistries.groupGamemodes.getId(),
           id("gamemode-adventure"),
-          builder -> builder.setName(GameType.ADVENTURE.getLongDisplayName())
-                       .setDescription(Component.translatable("commands.gamemode.success.self", GameType.ADVENTURE.getLongDisplayName()))
+          builder -> builder.setName(GameModeWidgetCallbacks::name)
+                       .setDescription(GameModeWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.MAP))
-                       .setHandler(WidgetActionHandlers.switchGameMode(GameType.ADVENTURE)));
+                       .setHandler(GameModeWidgetCallbacks::handler)
+                       .addMetadata(WIDGET_GAME_MODE_KEY, GameType.ADVENTURE));
 
         WidgetRegistries.widgetTimeNoon = createWidgetEntry(WidgetRegistries.groupTime.getId(),
           id("time-noon"),
-          builder -> builder.setName(Component.literal("Set time to noon"))
+          builder -> builder.setName(SetTimeWidgetCallbacks::name)
+                       .setDescription(SetTimeWidgetCallbacks::description)
                        .setIcon(ClockItemStackUtilities.createItemStack(0))
-                       .setHandler(WidgetActionHandlers.setTime(6000)));
+                       .setHandler(SetTimeWidgetCallbacks::handler)
+                       .addMetadata(TIME_KEY, 6000));
 
         WidgetRegistries.widgetTimeMidnight = createWidgetEntry(WidgetRegistries.groupTime.getId(),
           id("time-midnight"),
-          builder -> builder.setName(Component.literal("Set time to midnight"))
+          builder -> builder.setName(SetTimeWidgetCallbacks::name)
+                       .setDescription(SetTimeWidgetCallbacks::description)
                        .setIcon(ClockItemStackUtilities.createItemStack(0.5f))
-                       .setHandler(WidgetActionHandlers.setTime(18000)));
+                       .setHandler(SetTimeWidgetCallbacks::handler)
+                       .addMetadata(TIME_KEY, 18000));
+
+        WidgetRegistries.widgetSpeed01 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
+          id("speed-01"),
+          builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
+                       .setDescription(FlightSpeedWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.LEATHER_BOOTS))
+                       .setHandler(FlightSpeedWidgetCallbacks::handler)
+                       .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 1));
+
+        WidgetRegistries.widgetSpeed02 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
+          id("speed-02"),
+          builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
+                       .setDescription(FlightSpeedWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.IRON_BOOTS))
+                       .setHandler(FlightSpeedWidgetCallbacks::handler)
+                       .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 2));
+
+        WidgetRegistries.widgetSpeed05 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
+          id("speed-05"),
+          builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
+                       .setDescription(FlightSpeedWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.GOLDEN_BOOTS))
+                       .setHandler(FlightSpeedWidgetCallbacks::handler)
+                       .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 5));
+
+        WidgetRegistries.widgetSpeed10 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
+          id("speed-10"),
+          builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
+                       .setDescription(FlightSpeedWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.DIAMOND_BOOTS))
+                       .setHandler(FlightSpeedWidgetCallbacks::handler)
+                       .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 10));
+
+        WidgetRegistries.widgetItemBarrierBlock = createWidgetEntry(WidgetRegistries.groupItems.getId(),
+          id("item-barrier-block"),
+          builder -> builder.setName(ItemWidgetCallbacks::name)
+                       .setDescription(ItemWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.BARRIER))
+                       .setHandler(ItemWidgetCallbacks::handler));
+
+        WidgetRegistries.widgetItemDebugStick = createWidgetEntry(WidgetRegistries.groupItems.getId(),
+          id("item-debug-stick"),
+          builder -> builder.setName(ItemWidgetCallbacks::name)
+                       .setDescription(ItemWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.DEBUG_STICK))
+                       .setHandler(ItemWidgetCallbacks::handler));
+
+        final ItemStack invisibleItemFrame = new ItemStack(Items.ITEM_FRAME);
+        final CompoundTag invisibleItemFrameTag = invisibleItemFrame.getOrCreateTag();
+        final CompoundTag invisibleItemFrameEntityTag = new CompoundTag();
+        invisibleItemFrameEntityTag.putBoolean("Invisible", true);
+        invisibleItemFrameTag.put("EntityTag", invisibleItemFrameEntityTag);
+
+        WidgetRegistries.widgetItemInvisibleItemFrame = createWidgetEntry(WidgetRegistries.groupItems.getId(),
+          id("item-invisible-item-frame"),
+          builder -> builder.setName(ItemWidgetCallbacks::name)
+                       .setDescription(ItemWidgetCallbacks::description)
+                       .setIcon(invisibleItemFrame)
+                       .setHandler(ItemWidgetCallbacks::handler));
+
+        WidgetRegistries.widgetItemJigsawBlock = createWidgetEntry(WidgetRegistries.groupItems.getId(),
+          id("item-jigsaw-block"),
+          builder -> builder.setName(ItemWidgetCallbacks::name)
+                       .setDescription(ItemWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.JIGSAW))
+                       .setHandler(ItemWidgetCallbacks::handler));
+
+        WidgetRegistries.widgetItemStructureBlock = createWidgetEntry(WidgetRegistries.groupItems.getId(),
+          id("item-structure-block"),
+          builder -> builder.setName(ItemWidgetCallbacks::name)
+                       .setDescription(ItemWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.STRUCTURE_BLOCK))
+                       .setHandler(ItemWidgetCallbacks::handler));
+
+        WidgetRegistries.widgetItemStructureVoid = createWidgetEntry(WidgetRegistries.groupItems.getId(),
+          id("item-structure-void"),
+          builder -> builder.setName(ItemWidgetCallbacks::name)
+                       .setDescription(ItemWidgetCallbacks::description)
+                       .setIcon(new ItemStack(Items.STRUCTURE_VOID))
+                       .setHandler(ItemWidgetCallbacks::handler));
     }
 
     /**

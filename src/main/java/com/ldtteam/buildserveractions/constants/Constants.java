@@ -1,4 +1,4 @@
-package com.ldtteam.buildserveractions.util;
+package com.ldtteam.buildserveractions.constants;
 
 /**
  * Some constants needed for the whole mod.

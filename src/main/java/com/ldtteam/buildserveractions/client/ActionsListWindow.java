@@ -10,14 +10,16 @@ import com.ldtteam.blockui.views.ScrollingList;
 import com.ldtteam.blockui.views.SwitchView;
 import com.ldtteam.blockui.views.View;
 import com.ldtteam.buildserveractions.WidgetManager;
+import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
 import com.ldtteam.buildserveractions.network.messages.client.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
-import com.ldtteam.buildserveractions.util.Constants;
+import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.util.Network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -128,7 +130,8 @@ public class ActionsListWindow extends BOWindow
                                 Network.getNetwork().sendToServer(new WidgetTriggerMessage(widget));
                                 if (widget.getClientHandler() != null)
                                 {
-                                    widget.getClientHandler().accept(Minecraft.getInstance().player);
+                                    final WidgetSource source = new WidgetSource(widget, Minecraft.getInstance().player);
+                                    widget.getClientHandler().accept(source);
                                 }
                             });
 
@@ -136,10 +139,12 @@ public class ActionsListWindow extends BOWindow
                         }
 
                         final AbstractTextBuilder.TooltipBuilder tooltipBuilder = new AbstractTextBuilder.AutomaticTooltipBuilder()
-                                                                                    .append(widget.getName());
-                        if (widget.getDescription() != null)
+                                                                                    .append(widget.getName().apply(widget));
+
+                        final Component description = widget.getDescription().apply(widget);
+                        if (description != null)
                         {
-                            tooltipBuilder.appendNL(widget.getDescription());
+                            tooltipBuilder.appendNL(description);
                         }
                         tooltipBuilder.hoverPane(button).build();
                     }

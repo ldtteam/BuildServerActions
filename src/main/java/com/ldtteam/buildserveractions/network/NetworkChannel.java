@@ -5,7 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.ldtteam.buildserveractions.network.messages.client.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.network.messages.splitting.SplitPacketMessage;
-import com.ldtteam.buildserveractions.util.Constants;
+import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

@@ -3,7 +3,7 @@ package com.ldtteam.buildserveractions.client;
 import com.ldtteam.blockui.BOScreen;
 import com.ldtteam.buildserveractions.LayoutManager;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
-import com.ldtteam.buildserveractions.util.Constants;
+import com.ldtteam.buildserveractions.constants.Constants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

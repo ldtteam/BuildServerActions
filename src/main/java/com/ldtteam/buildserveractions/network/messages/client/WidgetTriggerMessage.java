@@ -1,6 +1,7 @@
 package com.ldtteam.buildserveractions.network.messages.client;
 
 import com.ldtteam.buildserveractions.WidgetManager;
+import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.buildserveractions.network.IMessage;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -61,6 +62,7 @@ public class WidgetTriggerMessage implements IMessage
             return;
         }
 
-        this.clickedWidget.getHandler().accept(ctxIn.getSender());
+        final WidgetSource source = new WidgetSource(this.clickedWidget, ctxIn.getSender());
+        this.clickedWidget.getHandler().accept(source);
     }
 }

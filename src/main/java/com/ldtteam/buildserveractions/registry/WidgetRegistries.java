@@ -2,15 +2,17 @@ package com.ldtteam.buildserveractions.registry;
 
 import com.ldtteam.blockui.Alignment;
 import com.ldtteam.blockui.util.records.SizeI;
+import com.ldtteam.buildserveractions.WidgetSource;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,6 +27,8 @@ public class WidgetRegistries
 
     public static RegistryObject<WidgetGroup> groupGamemodes;
     public static RegistryObject<WidgetGroup> groupTime;
+    public static RegistryObject<WidgetGroup> groupSpeed;
+    public static RegistryObject<WidgetGroup> groupItems;
 
     public static RegistryObject<Widget> widgetGamemodeSurvival;
     public static RegistryObject<Widget> widgetGamemodeCreative;
@@ -33,6 +37,18 @@ public class WidgetRegistries
 
     public static RegistryObject<Widget> widgetTimeNoon;
     public static RegistryObject<Widget> widgetTimeMidnight;
+
+    public static RegistryObject<Widget> widgetSpeed01;
+    public static RegistryObject<Widget> widgetSpeed02;
+    public static RegistryObject<Widget> widgetSpeed05;
+    public static RegistryObject<Widget> widgetSpeed10;
+
+    public static RegistryObject<Widget> widgetItemBarrierBlock;
+    public static RegistryObject<Widget> widgetItemDebugStick;
+    public static RegistryObject<Widget> widgetItemInvisibleItemFrame;
+    public static RegistryObject<Widget> widgetItemJigsawBlock;
+    public static RegistryObject<Widget> widgetItemStructureBlock;
+    public static RegistryObject<Widget> widgetItemStructureVoid;
 
     /**
      * Widget layout registry instance.
@@ -68,7 +84,11 @@ public class WidgetRegistries
          * Default internal constructor.
          */
         public WidgetLayout(
-          final Class<? extends AbstractContainerScreen<?>> screenClass, final int maxGroups, final int maxButtonsInGroup, final Alignment alignment, final Function<AbstractContainerScreen<?>, SizeI> offsetFunc)
+          final Class<? extends AbstractContainerScreen<?>> screenClass,
+          final int maxGroups,
+          final int maxButtonsInGroup,
+          final Alignment alignment,
+          final Function<AbstractContainerScreen<?>, SizeI> offsetFunc)
         {
             this.screenClass = screenClass;
             this.maxGroups = maxGroups;
@@ -405,13 +425,12 @@ public class WidgetRegistries
         /**
          * The component for the name.
          */
-        private final Component name;
+        private final Function<Widget, Component> name;
 
         /**
          * The component for the description.
          */
-        @Nullable
-        private final Component description;
+        private final Function<Widget, Component> description;
 
         /**
          * The icon.
@@ -419,15 +438,20 @@ public class WidgetRegistries
         private final ItemStack icon;
 
         /**
+         * Metadata on this widget object.
+         */
+        private final Map<String, Object> metadata;
+
+        /**
          * The handler function for this widget.
          */
-        private final Consumer<Player> handler;
+        private final Consumer<WidgetSource> handler;
 
         /**
          * The client handler function for this widget.
          */
         @Nullable
-        private final Consumer<Player> clientHandler;
+        private final Consumer<WidgetSource> clientHandler;
 
         /**
          * Default internal constructor.
@@ -435,17 +459,19 @@ public class WidgetRegistries
         private Widget(
           final ResourceLocation groupId,
           final ResourceLocation widgetId,
-          final Component name,
-          final @Nullable Component description,
+          final Function<Widget, Component> name,
+          final Function<Widget, Component> description,
           final ItemStack icon,
-          final Consumer<Player> handler,
-          final @Nullable Consumer<Player> clientHandler)
+          final Map<String, Object> metadata,
+          final Consumer<WidgetSource> handler,
+          final @Nullable Consumer<WidgetSource> clientHandler)
         {
             this.groupId = groupId;
             this.widgetId = widgetId;
             this.name = name;
             this.description = description;
             this.icon = icon;
+            this.metadata = metadata;
             this.handler = handler;
             this.clientHandler = clientHandler;
         }
@@ -475,7 +501,7 @@ public class WidgetRegistries
          *
          * @return the component.
          */
-        public Component getName()
+        public Function<Widget, Component> getName()
         {
             return name;
         }
@@ -485,7 +511,7 @@ public class WidgetRegistries
          *
          * @return the component.
          */
-        public Component getDescription()
+        public Function<Widget, Component> getDescription()
         {
             return description;
         }
@@ -501,11 +527,42 @@ public class WidgetRegistries
         }
 
         /**
+         * Get a value from the metadata of this widget.
+         *
+         * @param key the key of the metadata.
+         * @return the object or null if not exists.
+         */
+        public Object getMetadataValue(final String key)
+        {
+            return metadata.get(key);
+        }
+
+        /**
+         * Get a value from the metadata of this widget.
+         * Will attempt to cast the value to the correct type argument.
+         *
+         * @param key  the key of the metadata.
+         * @param type the expected type of the value.
+         * @return the object or null if not exists.
+         * @throws ClassCastException when the value of the key does not match the given type.
+         */
+        @SuppressWarnings("unchecked")
+        public <T> T getMetadataValue(final String key, final Class<T> type)
+        {
+            final Object value = getMetadataValue(key);
+            if (type.isInstance(value))
+            {
+                return (T) value;
+            }
+            return null;
+        }
+
+        /**
          * Get the handler function of this widget.
          *
          * @return the callback.
          */
-        public Consumer<Player> getHandler()
+        public Consumer<WidgetSource> getHandler()
         {
             return handler;
         }
@@ -515,7 +572,7 @@ public class WidgetRegistries
          *
          * @return the callback.
          */
-        public Consumer<Player> getClientHandler()
+        public Consumer<WidgetSource> getClientHandler()
         {
             return clientHandler;
         }
@@ -559,15 +616,19 @@ public class WidgetRegistries
             private final ResourceLocation widgetId;
 
             /**
-             * The component for the name.
+             * Metadata on this widget object.
              */
-            private Component name;
+            private final Map<String, Object> metadata = new HashMap<>();
 
             /**
-             * The component for the description.
+             * The getter for the component for the name.
              */
-            @Nullable
-            private Component description;
+            private Function<Widget, Component> name;
+
+            /**
+             * The getter for the component for the description.
+             */
+            private Function<Widget, Component> description = widget -> Component.empty();
 
             /**
              * The icon.
@@ -577,13 +638,13 @@ public class WidgetRegistries
             /**
              * The handler function for this widget.
              */
-            private Consumer<Player> handler;
+            private Consumer<WidgetSource> handler;
 
             /**
              * The client handler function for this widget.
              */
             @Nullable
-            private Consumer<Player> clientHandler;
+            private Consumer<WidgetSource> clientHandler;
 
             /**
              * Default constructor.
@@ -605,6 +666,19 @@ public class WidgetRegistries
              */
             public Widget.Builder setName(final Component name)
             {
+                this.name = widget -> name;
+                return this;
+            }
+
+            /**
+             * Set the name of this widget.
+             * Defaults to null.
+             *
+             * @param name the component.
+             * @return builder for chaining.
+             */
+            public Widget.Builder setName(final Function<Widget, Component> name)
+            {
                 this.name = name;
                 return this;
             }
@@ -617,6 +691,19 @@ public class WidgetRegistries
              * @return builder for chaining.
              */
             public Widget.Builder setDescription(final Component description)
+            {
+                this.description = widget -> description;
+                return this;
+            }
+
+            /**
+             * Set the description of this widget.
+             * Defaults to null.
+             *
+             * @param description the component.
+             * @return builder for chaining.
+             */
+            public Widget.Builder setDescription(final Function<Widget, Component> description)
             {
                 this.description = description;
                 return this;
@@ -636,13 +723,26 @@ public class WidgetRegistries
             }
 
             /**
+             * Add metadata to this widget, values may be anything and will be passed along to the handler.
+             *
+             * @param key  the key for the metadata.
+             * @param data the value for the metadata, may be anything.
+             * @return builder for chaining.
+             */
+            public Widget.Builder addMetadata(final String key, final Object data)
+            {
+                this.metadata.putIfAbsent(key, data);
+                return this;
+            }
+
+            /**
              * Set the handler of this widget.
              * Defaults to null.
              *
              * @param handler the callback.
              * @return builder for chaining.
              */
-            public Widget.Builder setHandler(final Consumer<Player> handler)
+            public Widget.Builder setHandler(final Consumer<WidgetSource> handler)
             {
                 this.handler = handler;
                 return this;
@@ -655,7 +755,7 @@ public class WidgetRegistries
              * @param clientHandler the callback.
              * @return builder for chaining.
              */
-            public Widget.Builder setClientHandler(final Consumer<Player> clientHandler)
+            public Widget.Builder setClientHandler(final Consumer<WidgetSource> clientHandler)
             {
                 this.clientHandler = clientHandler;
                 return this;
@@ -673,6 +773,10 @@ public class WidgetRegistries
                 {
                     throw new IllegalStateException("Name is mandatory.");
                 }
+                if (this.description == null)
+                {
+                    throw new IllegalStateException("Description is mandatory.");
+                }
                 if (this.icon == null)
                 {
                     throw new IllegalStateException("Icon is mandatory.");
@@ -681,7 +785,7 @@ public class WidgetRegistries
                 {
                     throw new IllegalStateException("Handler function is mandatory.");
                 }
-                return new Widget(groupId, widgetId, name, description, icon, handler, clientHandler);
+                return new Widget(groupId, widgetId, name, description, icon, metadata, handler, clientHandler);
             }
         }
     }

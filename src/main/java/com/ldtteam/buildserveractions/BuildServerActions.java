@@ -2,7 +2,7 @@ package com.ldtteam.buildserveractions;
 
 import com.ldtteam.buildserveractions.client.ActionsListGuiEventHandler;
 import com.ldtteam.buildserveractions.registry.WidgetRegistriesInitializer;
-import com.ldtteam.buildserveractions.util.Constants;
+import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.util.Network;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;

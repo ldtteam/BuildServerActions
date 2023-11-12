@@ -1,7 +1,7 @@
 package com.ldtteam.buildserveractions;
 
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
-import com.ldtteam.buildserveractions.util.Constants;
+import com.ldtteam.buildserveractions.constants.Constants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

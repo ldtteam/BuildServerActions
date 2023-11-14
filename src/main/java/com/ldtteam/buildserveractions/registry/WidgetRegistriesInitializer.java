@@ -21,6 +21,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.Comparator;
 import java.util.function.Consumer;
 
 import static com.ldtteam.buildserveractions.handlers.FlightSpeedWidgetCallbacks.FLIGHT_SPEED_MULTIPLIER_KEY;
@@ -78,9 +79,11 @@ public class WidgetRegistriesInitializer
           builder ->
             builder.setSorter(new GameModeWidgetCallbacks.GameModeSorter()));
 
-        WidgetRegistries.groupTime = createGroupEntry(id("group-time"), builder -> {});
+        WidgetRegistries.groupTime = createGroupEntry(id("group-time"),
+          builder -> builder.setSorter(Comparator.comparingInt(w -> w.getMetadataValue(TIME_KEY, Number.class).intValue())));
 
-        WidgetRegistries.groupSpeed = createGroupEntry(id("group-speed"), builder -> {});
+        WidgetRegistries.groupSpeed = createGroupEntry(id("group-speed"),
+          builder -> builder.setSorter(Comparator.comparingInt(w -> w.getMetadataValue(FLIGHT_SPEED_MULTIPLIER_KEY, Number.class).intValue())));
 
         WidgetRegistries.groupItems = createGroupEntry(id("group-items"), builder -> {});
     }
@@ -127,7 +130,6 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.widgetTimeNoon = createWidgetEntry(WidgetRegistries.groupTime.getId(),
           id("time-noon"),
           builder -> builder.setName(SetTimeWidgetCallbacks::name)
-                       .setDescription(SetTimeWidgetCallbacks::description)
                        .setIcon(ClockItemStackUtilities.createItemStack(0))
                        .setHandler(SetTimeWidgetCallbacks::handler)
                        .addMetadata(TIME_KEY, 6000));
@@ -135,7 +137,6 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.widgetTimeMidnight = createWidgetEntry(WidgetRegistries.groupTime.getId(),
           id("time-midnight"),
           builder -> builder.setName(SetTimeWidgetCallbacks::name)
-                       .setDescription(SetTimeWidgetCallbacks::description)
                        .setIcon(ClockItemStackUtilities.createItemStack(0.5f))
                        .setHandler(SetTimeWidgetCallbacks::handler)
                        .addMetadata(TIME_KEY, 18000));
@@ -143,7 +144,6 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.widgetSpeed01 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
           id("speed-01"),
           builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
-                       .setDescription(FlightSpeedWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.LEATHER_BOOTS))
                        .setHandler(FlightSpeedWidgetCallbacks::handler)
                        .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 1));
@@ -151,7 +151,6 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.widgetSpeed02 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
           id("speed-02"),
           builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
-                       .setDescription(FlightSpeedWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.IRON_BOOTS))
                        .setHandler(FlightSpeedWidgetCallbacks::handler)
                        .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 2));
@@ -159,7 +158,6 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.widgetSpeed05 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
           id("speed-05"),
           builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
-                       .setDescription(FlightSpeedWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.GOLDEN_BOOTS))
                        .setHandler(FlightSpeedWidgetCallbacks::handler)
                        .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 5));
@@ -167,7 +165,6 @@ public class WidgetRegistriesInitializer
         WidgetRegistries.widgetSpeed10 = createWidgetEntry(WidgetRegistries.groupSpeed.getId(),
           id("speed-10"),
           builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
-                       .setDescription(FlightSpeedWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.DIAMOND_BOOTS))
                        .setHandler(FlightSpeedWidgetCallbacks::handler)
                        .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 10));

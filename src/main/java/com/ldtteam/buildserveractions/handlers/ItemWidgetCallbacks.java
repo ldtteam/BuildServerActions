@@ -3,8 +3,11 @@ package com.ldtteam.buildserveractions.handlers;
 import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries.Widget;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 
+import static com.ldtteam.buildserveractions.constants.TranslationConstants.WIDGET_ITEM_DESC;
+import static com.ldtteam.buildserveractions.constants.TranslationConstants.WIDGET_ITEM_NAME;
 import static com.ldtteam.buildserveractions.util.WidgetLogger.broadcastMessage;
 
 /**
@@ -20,7 +23,7 @@ public class ItemWidgetCallbacks
      */
     public static Component name(final Widget widget)
     {
-        return widget.getIcon().getDisplayName();
+        return Component.translatable(WIDGET_ITEM_NAME, getItemName(widget));
     }
 
     /**
@@ -31,7 +34,7 @@ public class ItemWidgetCallbacks
      */
     public static Component description(final Widget widget)
     {
-        return widget.getIcon().getDisplayName();
+        return Component.translatable(WIDGET_ITEM_DESC, getItemName(widget));
     }
 
     /**
@@ -44,7 +47,8 @@ public class ItemWidgetCallbacks
         final ItemStack itemStack = resolveItemStack(source.widget());
         if (source.player().addItem(itemStack))
         {
-            broadcastMessage(source, source.widget().getDescription().apply(source.widget()));
+            final MutableComponent message = Component.translatable("commands.give.success.single", 1, getItemName(source.widget()), source.player().getDisplayName());
+            broadcastMessage(source, message);
         }
     }
 
@@ -59,5 +63,16 @@ public class ItemWidgetCallbacks
         final ItemStack copy = widget.getIcon().copy();
         copy.setCount(1);
         return copy;
+    }
+
+    /**
+     * Resolve the item name for the current item.
+     *
+     * @param widget the input widget.
+     * @return the component name.
+     */
+    private static Component getItemName(final Widget widget)
+    {
+        return widget.getIcon().getItem().getDescription();
     }
 }

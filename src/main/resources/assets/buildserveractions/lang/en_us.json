@@ -4,5 +4,7 @@
   "com.ldtteam.buildserveractions.widgets.flightspeed.1": "Set flight speed to default",
   "com.ldtteam.buildserveractions.widgets.flightspeed.2": "Set flight speed to x2",
   "com.ldtteam.buildserveractions.widgets.flightspeed.5": "Set flight speed to x5",
-  "com.ldtteam.buildserveractions.widgets.flightspeed.10": "Set flight speed to x10"
+  "com.ldtteam.buildserveractions.widgets.flightspeed.10": "Set flight speed to x10",
+  "com.ldtteam.buildserveractions.widgets.item": "Give '%s'",
+  "com.ldtteam.buildserveractions.widgets.item.desc": "Give yourself one '%s'"
 }

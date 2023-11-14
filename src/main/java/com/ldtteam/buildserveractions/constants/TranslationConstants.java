@@ -7,16 +7,14 @@ import java.util.function.LongFunction;
 /**
  * Constant values for translation keys.
  */
+@NonNls
 public class TranslationConstants
 {
-    @NonNls
     public static final LongFunction<String> WIDGET_SET_TIME_NAME     = multiplier -> "com.ldtteam.buildserveractions.widgets.settime." + multiplier;
-    @NonNls
-    public static final LongFunction<String> WIDGET_SET_TIME_DESC     = multiplier -> String.format("com.ldtteam.buildserveractions.widgets.settime.%s.desc", multiplier);
-    @NonNls
     public static final LongFunction<String> WIDGET_FLIGHT_SPEED_NAME = multiplier -> "com.ldtteam.buildserveractions.widgets.flightspeed." + multiplier;
-    @NonNls
-    public static final LongFunction<String> WIDGET_FLIGHT_SPEED_DESC = multiplier -> String.format("com.ldtteam.buildserveractions.widgets.flightspeed.%s.desc", multiplier);
+
+    public static final String WIDGET_ITEM_NAME = "com.ldtteam.buildserveractions.widgets.item";
+    public static final String WIDGET_ITEM_DESC = "com.ldtteam.buildserveractions.widgets.item.desc";
 
     private TranslationConstants()
     {

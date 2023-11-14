@@ -5,7 +5,6 @@ import com.ldtteam.buildserveractions.registry.WidgetRegistries.Widget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
-import static com.ldtteam.buildserveractions.constants.TranslationConstants.WIDGET_SET_TIME_DESC;
 import static com.ldtteam.buildserveractions.constants.TranslationConstants.WIDGET_SET_TIME_NAME;
 import static com.ldtteam.buildserveractions.util.WidgetLogger.broadcastMessage;
 
@@ -26,18 +25,6 @@ public class SetTimeWidgetCallbacks
     {
         Number multiplier = widget.getMetadataValue(TIME_KEY, Number.class);
         return Component.translatable(WIDGET_SET_TIME_NAME.apply(multiplier.longValue()));
-    }
-
-    /**
-     * Get the description for the game time.
-     *
-     * @param widget the widget class.
-     * @return the component.
-     */
-    public static Component description(final Widget widget)
-    {
-        Number multiplier = widget.getMetadataValue(TIME_KEY, Number.class);
-        return Component.translatable(WIDGET_SET_TIME_DESC.apply(multiplier.longValue()));
     }
 
     /**

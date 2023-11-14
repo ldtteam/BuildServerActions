@@ -13,10 +13,11 @@ import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
+import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.network.messages.client.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
-import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.util.Network;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -142,9 +143,9 @@ public class ActionsListWindow extends BOWindow
                                                                                     .append(widget.getName().apply(widget));
 
                         final Component description = widget.getDescription().apply(widget);
-                        if (description != null)
+                        if (description != null && !description.equals(Component.empty()))
                         {
-                            tooltipBuilder.appendNL(description);
+                            tooltipBuilder.newLine().appendNL(description.copy().withStyle(ChatFormatting.GRAY));
                         }
                         tooltipBuilder.hoverPane(button).build();
                     }

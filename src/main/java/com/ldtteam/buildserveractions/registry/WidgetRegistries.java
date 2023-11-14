@@ -628,7 +628,7 @@ public class WidgetRegistries
             /**
              * The getter for the component for the description.
              */
-            private Function<Widget, Component> description = widget -> Component.empty();
+            private Function<Widget, Component> description = widget -> null;
 
             /**
              * The icon.

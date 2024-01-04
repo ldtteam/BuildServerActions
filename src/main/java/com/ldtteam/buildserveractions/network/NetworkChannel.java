@@ -3,13 +3,13 @@ package com.ldtteam.buildserveractions.network;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
+import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.network.messages.client.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.network.messages.splitting.SplitPacketMessage;
-import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -210,7 +210,7 @@ public class NetworkChannel
      */
     public void sendToDimension(final IMessage msg, final ResourceLocation dim)
     {
-        rawChannel.send(PacketDistributor.DIMENSION.with(() -> ResourceKey.create(Registry.DIMENSION_REGISTRY, dim)), msg);
+        rawChannel.send(PacketDistributor.DIMENSION.with(() -> ResourceKey.create(Registries.DIMENSION, dim)), msg);
     }
 
     /**

@@ -2,8 +2,8 @@ package com.ldtteam.buildserveractions.client;
 
 import com.ldtteam.blockui.BOScreen;
 import com.ldtteam.buildserveractions.LayoutManager;
-import com.ldtteam.buildserveractions.registry.WidgetRegistries;
 import com.ldtteam.buildserveractions.constants.Constants;
+import com.ldtteam.buildserveractions.registry.WidgetRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -24,7 +24,7 @@ public class ActionsListGuiEventHandler
     }
 
     @SubscribeEvent
-    public static void onScreenOpened(ScreenEvent.Init.Post event)
+    public static void onScreenOpened(final ScreenEvent.Init.Post event)
     {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> containerScreen))
         {
@@ -42,7 +42,7 @@ public class ActionsListGuiEventHandler
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event)
+    public static void onClientTick(final TickEvent.ClientTickEvent event)
     {
         if (!event.phase.equals(TickEvent.Phase.END) || !event.side.isClient())
         {
@@ -57,6 +57,24 @@ public class ActionsListGuiEventHandler
                 if (child instanceof BOScreen attachedScreen)
                 {
                     attachedScreen.tick();
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(final ScreenEvent.MouseScrolled.Pre event)
+    {
+        // Scroll events only work directly within the screen itself and are not bubbled up to the children.
+        // So we have to manually forward it to the open GUI.
+        final Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null)
+        {
+            for (GuiEventListener child : mc.screen.children())
+            {
+                if (child instanceof BOScreen attachedScreen)
+                {
+                    attachedScreen.mouseScrolled(event.getMouseX(), event.getMouseY(), event.getScrollDelta());
                 }
             }
         }

@@ -1,6 +1,6 @@
 package com.ldtteam.buildserveractions.client.button;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.ldtteam.blockui.BOGuiGraphics;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +17,7 @@ public final class ClockItemButton extends ItemButton
     private ItemPropertyFunction initialFunction = null;
 
     @Override
-    protected void preRender(final PoseStack ms, final double mx, final double my)
+    protected void preRender(final BOGuiGraphics ms, final double mx, final double my)
     {
         if (itemStack.is(Items.CLOCK) && itemStack.getTag() != null && itemStack.getTag().contains(TIME_VALUE_KEY) && mc.level != null)
         {
@@ -28,7 +28,7 @@ public final class ClockItemButton extends ItemButton
     }
 
     @Override
-    protected void postRender(final PoseStack ms, final double mx, final double my)
+    protected void postRender(final BOGuiGraphics ms, final double mx, final double my)
     {
         if (initialFunction != null)
         {

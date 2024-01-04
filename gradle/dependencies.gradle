@@ -13,11 +13,4 @@ dependencies {
     implementation(fg.deobf("com.ldtteam:blockui:${project.blockUI_version}")) {
         transitive = false
     }
-
-    datagenLibrary(("com.ldtteam:datagenerators:${project.dataGeneratorsVersion}")) {
-        transitive = false
-    }
-    library(("com.ldtteam:datagenerators:${project.dataGeneratorsVersion}")) {
-        transitive = false
-    }
 }

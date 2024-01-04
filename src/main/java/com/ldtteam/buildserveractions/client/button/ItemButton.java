@@ -1,6 +1,6 @@
 package com.ldtteam.buildserveractions.client.button;
 
-import com.ldtteam.blockui.MatrixUtils;
+import com.ldtteam.blockui.BOGuiGraphics;
 import com.ldtteam.blockui.controls.ButtonVanilla;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -44,11 +44,11 @@ public class ItemButton extends ButtonVanilla
     /**
      * Called prior to rendering the icon.
      *
-     * @param ms the pose stack.
-     * @param mx mouse x (relative to parent
-     * @param my mouse y (relative to parent)
+     * @param target the gui graphics.
+     * @param mx     mouse x (relative to parent
+     * @param my     mouse y (relative to parent)
      */
-    protected void preRender(final PoseStack ms, final double mx, final double my)
+    protected void preRender(final BOGuiGraphics target, final double mx, final double my)
     {
         // Default empty
     }
@@ -56,32 +56,33 @@ public class ItemButton extends ButtonVanilla
     /**
      * Called after rendering the icon.
      *
-     * @param ms the pose stack.
-     * @param mx mouse x (relative to parent
-     * @param my mouse y (relative to parent)
+     * @param target the gui graphics.
+     * @param mx     mouse x (relative to parent
+     * @param my     mouse y (relative to parent)
      */
-    protected void postRender(final PoseStack ms, final double mx, final double my)
+    protected void postRender(final BOGuiGraphics target, final double mx, final double my)
     {
         // Default empty
     }
 
     @Override
-    public final void drawSelf(final PoseStack ms, final double mx, final double my)
+    public final void drawSelf(final BOGuiGraphics target, final double mx, final double my)
     {
-        super.drawSelf(ms, mx, my);
+        super.drawSelf(target, mx, my);
         if (itemStack != null)
         {
-            MatrixUtils.pushShaderMVstack(ms);
+            final PoseStack ms = target.pose();
+            ms.pushPose();
 
-            preRender(ms, mx, my);
+            preRender(target, mx, my);
 
-            mc.getItemRenderer().renderAndDecorateItem(itemStack, x + spacing, y + spacing);
+            target.renderItem(itemStack, x + spacing, y + spacing);
 
-            postRender(ms, mx, my);
+            postRender(target, mx, my);
 
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
-            MatrixUtils.popShaderMVstack();
+            ms.popPose();
         }
     }
 }

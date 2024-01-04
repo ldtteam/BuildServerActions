@@ -4,9 +4,9 @@ import com.ldtteam.blockui.Loader;
 import com.ldtteam.blockui.Pane;
 import com.ldtteam.blockui.controls.AbstractTextBuilder;
 import com.ldtteam.blockui.controls.ImageRepeatable;
-import com.ldtteam.blockui.util.records.SizeI;
 import com.ldtteam.blockui.views.BOWindow;
 import com.ldtteam.blockui.views.ScrollingList;
+import com.ldtteam.blockui.views.ScrollingListContainer.RowSizeModifier;
 import com.ldtteam.blockui.views.SwitchView;
 import com.ldtteam.blockui.views.View;
 import com.ldtteam.buildserveractions.WidgetManager;
@@ -102,9 +102,9 @@ public class ActionsListWindow extends BOWindow
                 }
 
                 @Override
-                public SizeI getElementSize(final int index, final Pane rowPane)
+                public void modifyRowSize(final int index, final RowSizeModifier modifier)
                 {
-                    return new SizeI(maxContainerWidth, index + 1 == widgetsInColumn ? WIDGET_SIZE : WIDGET_OFFSET);
+                    modifier.setHeight(index + 1 == widgetsInColumn ? WIDGET_SIZE : WIDGET_OFFSET);
                 }
 
                 @Override
@@ -159,6 +159,7 @@ public class ActionsListWindow extends BOWindow
 
         screen.init(attachedToScreen.getMinecraft(), maxContainerWidth + (ROOT_MARGIN * 2), maxContainerHeight + (ROOT_MARGIN * 2) + BANNER_TOP_MARGIN);
 
+        setPosition(getPositionX(attachedToScreen, layout), getPositionY(attachedToScreen, layout));
         onPageUpdate(0);
     }
 

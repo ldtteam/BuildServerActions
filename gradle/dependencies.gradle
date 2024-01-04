@@ -7,9 +7,6 @@ repositories {
 }
 
 dependencies {
-    apiImplementation(fg.deobf("com.ldtteam:blockui:${project.blockUI_version}")) {
-        transitive = false
-    }
     implementation(fg.deobf("com.ldtteam:blockui:${project.blockUI_version}")) {
         transitive = false
     }

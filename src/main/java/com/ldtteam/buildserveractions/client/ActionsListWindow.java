@@ -9,14 +9,15 @@ import com.ldtteam.blockui.views.ScrollingList;
 import com.ldtteam.blockui.views.ScrollingListContainer.RowSizeModifier;
 import com.ldtteam.blockui.views.SwitchView;
 import com.ldtteam.blockui.views.View;
+import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
 import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
 import com.ldtteam.buildserveractions.constants.Constants;
-import com.ldtteam.buildserveractions.network.messages.client.WidgetTriggerMessage;
+import com.ldtteam.buildserveractions.network.Network;
+import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
-import com.ldtteam.buildserveractions.util.Network;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -48,7 +49,7 @@ public class ActionsListWindow extends BOWindow
     /**
      * The layout information for this screen.
      */
-    private final WidgetRegistries.WidgetLayout layout;
+    private final WidgetLayout layout;
 
     /**
      * The amount of widgets allowed in a single column.
@@ -61,7 +62,7 @@ public class ActionsListWindow extends BOWindow
      * @param attachedToScreen the screen this window will be attached to.
      * @param layout           the layout information for this screen.
      */
-    public ActionsListWindow(final AbstractContainerScreen<?> attachedToScreen, final WidgetRegistries.WidgetLayout layout)
+    public ActionsListWindow(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
         super(new ResourceLocation(Constants.MOD_ID, "gui/actionslist.xml"));
         this.attachedToScreen = attachedToScreen;
@@ -128,7 +129,7 @@ public class ActionsListWindow extends BOWindow
                             button.setSpacing(2);
                             button.setItem(widget.getIcon());
                             button.setHandler(btn -> {
-                                Network.getNetwork().sendToServer(new WidgetTriggerMessage(widget));
+                                Network.getInstance().getChannel().sendToServer(new WidgetTriggerMessage(widget));
                                 if (widget.getClientHandler() != null)
                                 {
                                     final WidgetSource source = new WidgetSource(widget, Minecraft.getInstance().player);
@@ -188,7 +189,7 @@ public class ActionsListWindow extends BOWindow
      * @param layout           the layout information for this screen.
      * @return the X position.
      */
-    private int getPositionX(final AbstractContainerScreen<?> attachedToScreen, final WidgetRegistries.WidgetLayout layout)
+    private int getPositionX(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
         if (layout.getAlignment().isHorizontalCentered())
         {
@@ -211,7 +212,7 @@ public class ActionsListWindow extends BOWindow
      * @param layout           the layout information for this screen.
      * @return the Y position.
      */
-    private int getPositionY(final AbstractContainerScreen<?> attachedToScreen, final WidgetRegistries.WidgetLayout layout)
+    private int getPositionY(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
         if (layout.getAlignment().isVerticalCentered())
         {

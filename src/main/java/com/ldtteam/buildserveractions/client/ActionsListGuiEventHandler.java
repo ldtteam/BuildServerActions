@@ -2,8 +2,8 @@ package com.ldtteam.buildserveractions.client;
 
 import com.ldtteam.blockui.BOScreen;
 import com.ldtteam.buildserveractions.LayoutManager;
+import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
 import com.ldtteam.buildserveractions.constants.Constants;
-import com.ldtteam.buildserveractions.registry.WidgetRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -31,7 +31,7 @@ public class ActionsListGuiEventHandler
             return;
         }
 
-        final WidgetRegistries.WidgetLayout renderLayout = LayoutManager.getInstance().getLayout(event.getScreen().getClass());
+        final WidgetLayout renderLayout = LayoutManager.getInstance().getLayout(event.getScreen().getClass());
         if (renderLayout == null)
         {
             return;

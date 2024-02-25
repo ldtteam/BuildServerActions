@@ -1,17 +1,11 @@
 package com.ldtteam.buildserveractions.registry;
 
-import com.ldtteam.blockui.Alignment;
-import com.ldtteam.blockui.util.records.SizeI;
 import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.handlers.FlightSpeedWidgetCallbacks;
 import com.ldtteam.buildserveractions.handlers.GameModeWidgetCallbacks;
 import com.ldtteam.buildserveractions.handlers.ItemWidgetCallbacks;
 import com.ldtteam.buildserveractions.handlers.SetTimeWidgetCallbacks;
 import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -33,40 +27,10 @@ import static com.ldtteam.buildserveractions.handlers.SetTimeWidgetCallbacks.TIM
  */
 public class WidgetRegistriesInitializer
 {
-    public static final DeferredRegister<WidgetRegistries.WidgetLayout> DEFERRED_LAYOUT_REGISTER =
-      DeferredRegister.create(new ResourceLocation(Constants.MOD_ID, "widget-layouts"), Constants.MOD_ID);
     public static final DeferredRegister<WidgetRegistries.WidgetGroup>  DEFERRED_GROUP_REGISTER  =
       DeferredRegister.create(new ResourceLocation(Constants.MOD_ID, "widget-groups"), Constants.MOD_ID);
     public static final DeferredRegister<WidgetRegistries.Widget>       DEFERRED_WIDGET_REGISTER =
       DeferredRegister.create(new ResourceLocation(Constants.MOD_ID, "widgets"), Constants.MOD_ID);
-
-    /**
-     * Register all widget layout entries.
-     */
-    public static void registerLayoutEntries(final IEventBus eventBus)
-    {
-        DEFERRED_LAYOUT_REGISTER.register(eventBus);
-
-        WidgetRegistries.layoutSurvivalInventory = createLayoutEntry(id("layout-inv-survival"),
-          InventoryScreen.class,
-          builder -> builder.setAlignment(Alignment.MIDDLE_LEFT)
-                       .setOffset(screen -> {
-                           SizeI size = new SizeI(-10, 0);
-                           if (screen instanceof InventoryScreen inventoryScreen && inventoryScreen.getRecipeBookComponent().isVisible())
-                           {
-                               final SizeI.MutableSizeI mutable = size.toMutable();
-                               mutable.width -= RecipeBookComponent.IMAGE_WIDTH;
-                               size = mutable.toImmutable();
-                           }
-                           return size;
-                       }));
-
-        WidgetRegistries.layoutCreativeInventory =
-          createLayoutEntry(id("layout-inv-creative"),
-            CreativeModeInventoryScreen.class,
-            builder -> builder.setAlignment(Alignment.MIDDLE_LEFT)
-                         .setOffset(new SizeI(-10, 0)));
-    }
 
     /**
      * Register all widget group entries.
@@ -216,24 +180,6 @@ public class WidgetRegistriesInitializer
                        .setDescription(ItemWidgetCallbacks::description)
                        .setIcon(new ItemStack(Items.STRUCTURE_VOID))
                        .setHandler(ItemWidgetCallbacks::handler));
-    }
-
-    /**
-     * Internal method for wrapping the builder class for widget layouts.
-     *
-     * @param layoutId    the id of the layout.
-     * @param screenClass the attached screen class type.
-     * @param builder     the builder callback.
-     * @return the created registry object.
-     */
-    private static RegistryObject<WidgetRegistries.WidgetLayout> createLayoutEntry(
-      final ResourceLocation layoutId,
-      final Class<? extends AbstractContainerScreen<?>> screenClass,
-      final Consumer<WidgetRegistries.WidgetLayout.Builder> builder)
-    {
-        final WidgetRegistries.WidgetLayout.Builder layout = new WidgetRegistries.WidgetLayout.Builder(screenClass);
-        builder.accept(layout);
-        return DEFERRED_LAYOUT_REGISTER.register(layoutId.getPath(), layout::build);
     }
 
     /**

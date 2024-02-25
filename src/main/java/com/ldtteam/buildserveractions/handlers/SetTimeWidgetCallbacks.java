@@ -41,7 +41,7 @@ public class SetTimeWidgetCallbacks
             {
                 serverlevel.setDayTime(timeOfDay.longValue());
             }
-            broadcastMessage(source, source.widget().getDescription().apply(source.widget()));
+            //broadcastMessage(source, source.widget().getDescription().apply(source.widget()));
         }
     }
 }

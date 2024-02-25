@@ -47,7 +47,7 @@ public class FlightSpeedWidgetCallbacks
             source.player().getAbilities().setFlyingSpeed(DEFAULT_FLYING_SPEED * multiplier.longValue());
             source.player().onUpdateAbilities();
 
-            broadcastMessage(source, source.widget().getDescription().apply(source.widget()));
+            //broadcastMessage(source, source.widget().getDescription().apply(source.widget()));
         }
     }
 }

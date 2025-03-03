@@ -7,7 +7,14 @@ repositories {
 }
 
 dependencies {
-    implementation(fg.deobf("com.ldtteam:blockui:${project.blockUI_version}")) {
+    implementation(fg.deobf("com.ldtteam:blockui:${project.blockUIVersion}")) {
+        transitive = false
+    }
+
+    compileOnly(fg.deobf("com.ldtteam:domum_ornamentum:${project.domumOrnamentumVersion}:universal")) {
+        transitive = false
+    }
+    runtimeOnly(fg.deobf("com.ldtteam:domum_ornamentum:${project.domumOrnamentumVersion}:universal")) {
         transitive = false
     }
 }

@@ -11,7 +11,6 @@ import com.ldtteam.blockui.views.SwitchView;
 import com.ldtteam.blockui.views.View;
 import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
 import com.ldtteam.buildserveractions.WidgetManager;
-import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
 import com.ldtteam.buildserveractions.constants.Constants;
@@ -19,7 +18,6 @@ import com.ldtteam.buildserveractions.network.Network;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -71,7 +69,7 @@ public class ActionsListWindow extends BOWindow
         this.windowPausesGame = attachedToScreen.isPauseScreen();
         this.lightbox = false;
 
-        int widgetsInRow = Math.min(WidgetManager.getInstance().getWidgetGroupCount(), layout.getMaxGroups());
+        final int widgetsInRow = Math.min(WidgetManager.getInstance().getWidgetGroupCount(), layout.getMaxGroups());
         this.widgetsInColumn = WidgetManager.getInstance().getMaxWidgetCountInGroup();
 
         final ImageRepeatable background = findPaneOfTypeByID("background", ImageRepeatable.class);
@@ -128,20 +126,12 @@ public class ActionsListWindow extends BOWindow
                             button.setPosition(groupOffset * WIDGET_OFFSET, 0);
                             button.setSpacing(2);
                             button.setItem(widget.getIcon());
-                            button.setHandler(btn -> {
-                                Network.getInstance().getChannel().sendToServer(new WidgetTriggerMessage(widget));
-                                if (widget.getClientHandler() != null)
-                                {
-                                    final WidgetSource source = new WidgetSource(widget, Minecraft.getInstance().player);
-                                    widget.getClientHandler().accept(source);
-                                }
-                            });
+                            button.setHandler(btn -> Network.getInstance().getChannel().sendToServer(new WidgetTriggerMessage(widget)));
 
                             ((View) rowPane).addChild(button);
                         }
 
-                        final AbstractTextBuilder.TooltipBuilder tooltipBuilder = new AbstractTextBuilder.AutomaticTooltipBuilder()
-                                                                                    .append(widget.getName().apply(widget));
+                        final AbstractTextBuilder.TooltipBuilder tooltipBuilder = new AbstractTextBuilder.AutomaticTooltipBuilder().append(widget.getName().apply(widget));
 
                         final Component description = widget.getDescription().apply(widget);
                         if (description != null && !description.equals(Component.empty()))

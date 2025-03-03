@@ -3,6 +3,10 @@ package com.ldtteam.buildserveractions;
 import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.network.Network;
 import com.ldtteam.buildserveractions.registry.WidgetRegistries;
+import com.ldtteam.buildserveractions.registry.WidgetRegistries.Widget;
+import com.ldtteam.buildserveractions.registry.WidgetRegistries.WidgetGroup;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -15,8 +19,10 @@ import org.jetbrains.annotations.NotNull;
  * Event handler class for the mod code.
  */
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class EventManager
+public class EventHandler
 {
+    public static final ResourceKey<Registry<WidgetGroup>> WIDGET_GROUP_REGISTRY_KEY = ResourceKey.createRegistryKey(new ResourceLocation(Constants.MOD_ID, "widget-groups"));
+    public static final ResourceKey<Registry<Widget>>      WIDGET_REGISTRY_KEY       = ResourceKey.createRegistryKey(new ResourceLocation(Constants.MOD_ID, "widgets"));
 
     /**
      * Event handler for forge pre init event.
@@ -32,14 +38,12 @@ public class EventManager
     @SubscribeEvent
     public static void registerNewRegistries(final NewRegistryEvent event)
     {
-        event.create(new RegistryBuilder<WidgetRegistries.WidgetGroup>()
-                       .setName(new ResourceLocation(Constants.MOD_ID, "widget-groups"))
+        event.create(new RegistryBuilder<WidgetRegistries.WidgetGroup>().setName(WIDGET_GROUP_REGISTRY_KEY.location())
                        .disableSaving()
                        .allowModification()
                        .setIDRange(0, Integer.MAX_VALUE - 1), WidgetManager.getInstance()::setWidgetGroupRegistry);
 
-        event.create(new RegistryBuilder<WidgetRegistries.Widget>()
-                       .setName(new ResourceLocation(Constants.MOD_ID, "widgets"))
+        event.create(new RegistryBuilder<WidgetRegistries.Widget>().setName(WIDGET_REGISTRY_KEY.location())
                        .disableSaving()
                        .allowModification()
                        .setIDRange(0, Integer.MAX_VALUE - 1), WidgetManager.getInstance()::setWidgetRegistry);

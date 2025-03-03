@@ -7,7 +7,7 @@
 modLoader="javafml"
 loaderVersion="${fml_range}"
 license="GPL 3.0"
-issueTrackerURL="https://github.com/ldtteam/minecolonies/issues/new/choose"
+issueTrackerURL="https://github.com/ldtteam/BuildServerActions/issues/new"
 [[mods]]
 modId="${modId}"
 version="${version}"

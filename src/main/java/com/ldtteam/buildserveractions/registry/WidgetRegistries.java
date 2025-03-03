@@ -4,8 +4,6 @@ import com.ldtteam.buildserveractions.WidgetSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,31 +17,6 @@ import java.util.function.Function;
 @SuppressWarnings({"java:S1104", "java:S1444"})
 public class WidgetRegistries
 {
-    public static RegistryObject<WidgetGroup> groupGamemodes;
-    public static RegistryObject<WidgetGroup> groupTime;
-    public static RegistryObject<WidgetGroup> groupSpeed;
-    public static RegistryObject<WidgetGroup> groupItems;
-
-    public static RegistryObject<Widget> widgetGamemodeSurvival;
-    public static RegistryObject<Widget> widgetGamemodeCreative;
-    public static RegistryObject<Widget> widgetGamemodeAdventure;
-    public static RegistryObject<Widget> widgetGamemodeSpectator;
-
-    public static RegistryObject<Widget> widgetTimeNoon;
-    public static RegistryObject<Widget> widgetTimeMidnight;
-
-    public static RegistryObject<Widget> widgetSpeed01;
-    public static RegistryObject<Widget> widgetSpeed02;
-    public static RegistryObject<Widget> widgetSpeed05;
-    public static RegistryObject<Widget> widgetSpeed10;
-
-    public static RegistryObject<Widget> widgetItemBarrierBlock;
-    public static RegistryObject<Widget> widgetItemDebugStick;
-    public static RegistryObject<Widget> widgetItemInvisibleItemFrame;
-    public static RegistryObject<Widget> widgetItemJigsawBlock;
-    public static RegistryObject<Widget> widgetItemStructureBlock;
-    public static RegistryObject<Widget> widgetItemStructureVoid;
-
     /**
      * Widget group registry instance.
      */
@@ -207,12 +180,6 @@ public class WidgetRegistries
         private final Consumer<WidgetSource> handler;
 
         /**
-         * The client handler function for this widget.
-         */
-        @Nullable
-        private final Consumer<WidgetSource> clientHandler;
-
-        /**
          * Default internal constructor.
          */
         private Widget(
@@ -222,8 +189,7 @@ public class WidgetRegistries
           final Function<Widget, Component> description,
           final ItemStack icon,
           final Map<String, Object> metadata,
-          final Consumer<WidgetSource> handler,
-          final @Nullable Consumer<WidgetSource> clientHandler)
+          final Consumer<WidgetSource> handler)
         {
             this.groupId = groupId;
             this.widgetId = widgetId;
@@ -232,7 +198,6 @@ public class WidgetRegistries
             this.icon = icon;
             this.metadata = metadata;
             this.handler = handler;
-            this.clientHandler = clientHandler;
         }
 
         /**
@@ -326,16 +291,6 @@ public class WidgetRegistries
             return handler;
         }
 
-        /**
-         * Get the client handler function of this widget.
-         *
-         * @return the callback.
-         */
-        public Consumer<WidgetSource> getClientHandler()
-        {
-            return clientHandler;
-        }
-
         @Override
         public int hashCode()
         {
@@ -398,12 +353,6 @@ public class WidgetRegistries
              * The handler function for this widget.
              */
             private Consumer<WidgetSource> handler;
-
-            /**
-             * The client handler function for this widget.
-             */
-            @Nullable
-            private Consumer<WidgetSource> clientHandler;
 
             /**
              * Default constructor.
@@ -508,19 +457,6 @@ public class WidgetRegistries
             }
 
             /**
-             * Set the client handler of this widget.
-             * Defaults to null.
-             *
-             * @param clientHandler the callback.
-             * @return builder for chaining.
-             */
-            public Widget.Builder setClientHandler(final Consumer<WidgetSource> clientHandler)
-            {
-                this.clientHandler = clientHandler;
-                return this;
-            }
-
-            /**
              * Finalize construction of the {@link Widget} instance.
              *
              * @return the instance.
@@ -544,7 +480,7 @@ public class WidgetRegistries
                 {
                     throw new IllegalStateException("Handler function is mandatory.");
                 }
-                return new Widget(groupId, widgetId, name, description, icon, metadata, handler, clientHandler);
+                return new Widget(groupId, widgetId, name, description, icon, metadata, handler);
             }
         }
     }

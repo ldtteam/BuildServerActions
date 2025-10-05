@@ -212,7 +212,7 @@ public class WidgetRegistriesInitializer
               id("item-debug-stick"),
               builder -> builder.setName(ItemWidgetCallbacks::name)
                            .setDescription(ItemWidgetCallbacks::description)
-                           .setIcon(new ItemStack(Items.DEBUG_STICK))
+                           .setIcon(new ItemStack(ModItems.DEBUG_STICK.get()))
                            .setHandler(ItemWidgetCallbacks::handler));
 
             final ItemStack invisibleItemFrame = new ItemStack(Items.ITEM_FRAME);

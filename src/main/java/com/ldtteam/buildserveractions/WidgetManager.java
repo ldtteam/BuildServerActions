@@ -1,6 +1,7 @@
 package com.ldtteam.buildserveractions;
 
-import com.ldtteam.buildserveractions.registry.WidgetRegistries;
+import com.ldtteam.buildserveractions.widget.Widget;
+import com.ldtteam.buildserveractions.widget.WidgetGroup;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -25,13 +26,13 @@ public class WidgetManager
      * The forge registry containing all the widget groups.
      */
     @Nullable
-    private IForgeRegistry<WidgetRegistries.WidgetGroup> widgetGroups;
+    private IForgeRegistry<WidgetGroup> widgetGroups;
 
     /**
      * The forge registry containing all the widgets.
      */
     @Nullable
-    private IForgeRegistry<WidgetRegistries.Widget> widgets;
+    private IForgeRegistry<Widget> widgets;
 
     /**
      * Obtain the {@link WidgetManager} instance.
@@ -52,7 +53,7 @@ public class WidgetManager
      *
      * @param registry the registry.
      */
-    void setWidgetGroupRegistry(final IForgeRegistry<WidgetRegistries.WidgetGroup> registry)
+    void setWidgetGroupRegistry(final IForgeRegistry<WidgetGroup> registry)
     {
         this.widgetGroups = registry;
     }
@@ -62,7 +63,7 @@ public class WidgetManager
      *
      * @param registry the registry.
      */
-    void setWidgetRegistry(final IForgeRegistry<WidgetRegistries.Widget> registry)
+    void setWidgetRegistry(final IForgeRegistry<Widget> registry)
     {
         this.widgets = registry;
     }
@@ -73,11 +74,11 @@ public class WidgetManager
      * @param buf network data byte buffer.
      * @return the widget, or null if a problem occurred on the sending side.
      */
-    public WidgetRegistries.Widget readWidgetFromBuffer(final FriendlyByteBuf buf)
+    public Widget readWidgetFromBuffer(final FriendlyByteBuf buf)
     {
         if (buf.readBoolean())
         {
-            return buf.readRegistryIdSafe(WidgetRegistries.Widget.class);
+            return buf.readRegistryIdSafe(Widget.class);
         }
         return null;
     }
@@ -88,7 +89,7 @@ public class WidgetManager
      * @param buf    network data byte buffer.
      * @param widget the widget to write.
      */
-    public void writeWidgetToBuffer(final FriendlyByteBuf buf, final WidgetRegistries.Widget widget)
+    public void writeWidgetToBuffer(final FriendlyByteBuf buf, final Widget widget)
     {
         if (this.widgets == null || widget == null)
         {
@@ -124,8 +125,7 @@ public class WidgetManager
         {
             return 0;
         }
-        final Map<ResourceLocation, List<WidgetRegistries.Widget>> grouped = this.widgets.getValues().stream()
-                                                                               .collect(Collectors.groupingBy(WidgetRegistries.Widget::getGroupId));
+        final Map<ResourceLocation, List<Widget>> grouped = this.widgets.getValues().stream().collect(Collectors.groupingBy(Widget::getGroupId));
         return grouped.values().stream().mapToInt(List::size).max().orElse(0);
     }
 
@@ -137,7 +137,7 @@ public class WidgetManager
      * @return the widget, or null.
      */
     @Nullable
-    public WidgetRegistries.Widget getWidget(final int groupIndex, final int index)
+    public Widget getWidget(final int groupIndex, final int index)
     {
         if (this.widgetGroups == null || this.widgets == null)
         {
@@ -146,17 +146,14 @@ public class WidgetManager
 
         try
         {
-            final Map.Entry<ResourceKey<WidgetRegistries.WidgetGroup>, WidgetRegistries.WidgetGroup> group =
-              this.widgetGroups.getEntries().stream()
-                .sorted(Map.Entry.comparingByKey())
+            final Map.Entry<ResourceKey<WidgetGroup>, WidgetGroup> group = this.widgetGroups.getEntries().stream().sorted(Map.Entry.comparingByKey()).toList().get(groupIndex);
+            return this.widgets.getEntries()
+                .stream()
+                .filter(f -> f.getValue().getGroupId().equals(group.getValue().getId()))
+                .sorted((s1, s2) -> group.getValue().getWidgetSorter().compare(s1.getValue(), s2.getValue()))
                 .toList()
-                .get(groupIndex);
-            return this.widgets.getEntries().stream()
-                     .filter(f -> f.getValue().getGroupId().equals(group.getValue().getId()))
-                     .sorted((s1, s2) -> group.getValue().getWidgetSorter().compare(s1.getValue(), s2.getValue()))
-                     .toList()
-                     .get(index)
-                     .getValue();
+                .get(index)
+                .getValue();
         }
         catch (Exception e)
         {

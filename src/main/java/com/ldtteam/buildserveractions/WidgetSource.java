@@ -1,6 +1,6 @@
 package com.ldtteam.buildserveractions;
 
-import com.ldtteam.buildserveractions.registry.WidgetRegistries.Widget;
+import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.world.entity.player.Player;
 
 /**

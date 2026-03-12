@@ -22,8 +22,8 @@ public final class ClockItemButton extends ItemButton
         if (itemStack.is(Items.CLOCK) && itemStack.getTag() != null && itemStack.getTag().contains(TIME_VALUE_KEY) && mc.level != null)
         {
             final float timeValue = itemStack.getTag().getFloat(TIME_VALUE_KEY);
-            initialFunction = ItemProperties.getProperty(Items.CLOCK, new ResourceLocation("time"));
-            ItemProperties.register(Items.CLOCK, new ResourceLocation("time"), (pStack, pLevel, pEntity, pSeed) -> timeValue);
+            initialFunction = ItemProperties.getProperty(Items.CLOCK, ResourceLocation.parse("time"));
+            ItemProperties.register(Items.CLOCK, ResourceLocation.parse("time"), (pStack, pLevel, pEntity, pSeed) -> timeValue);
         }
     }
 
@@ -32,7 +32,7 @@ public final class ClockItemButton extends ItemButton
     {
         if (initialFunction != null)
         {
-            ItemProperties.register(Items.CLOCK, new ResourceLocation("time"), initialFunction);
+            ItemProperties.register(Items.CLOCK, ResourceLocation.parse("time"), initialFunction);
             initialFunction = null;
         }
     }

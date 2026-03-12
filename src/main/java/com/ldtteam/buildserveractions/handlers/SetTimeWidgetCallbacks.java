@@ -1,7 +1,7 @@
 package com.ldtteam.buildserveractions.handlers;
 
 import com.ldtteam.buildserveractions.WidgetSource;
-import com.ldtteam.buildserveractions.registry.WidgetRegistries.Widget;
+import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 

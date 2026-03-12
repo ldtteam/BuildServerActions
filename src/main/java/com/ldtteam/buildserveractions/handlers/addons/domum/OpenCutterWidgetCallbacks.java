@@ -1,4 +1,4 @@
-package com.ldtteam.buildserveractions.handlers.domum;
+package com.ldtteam.buildserveractions.handlers.addons.domum;
 
 import com.ldtteam.buildserveractions.WidgetSource;
 import com.ldtteam.domumornamentum.container.ArchitectsCutterContainer;

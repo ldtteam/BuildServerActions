@@ -6,66 +6,27 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
+import static com.ldtteam.buildserveractions.constants.Constants.modId;
+
 /**
- * Wrapper for Forge network layer
+ * Network channel for the mod.
  */
 public class Network
 {
-    /**
-     * Singleton instance.
-     */
-    private static Network instance;
+    private static final String MOD_VERSION = ModList.get().getModContainerById(Constants.MOD_ID).get().getModInfo().getVersion().toString();
 
-    /**
-     * Forge network channel
-     */
-    private final SimpleChannel rawChannel;
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+        modId("default"),
+        () -> MOD_VERSION,
+        MOD_VERSION::equals,
+        MOD_VERSION::equals);
 
-    /**
-     * Creates a new instance of network channel.
-     *
-     * @throws IllegalArgumentException if channelName already exists
-     */
-    public Network()
+    public static void register()
     {
-        final String modVersion = ModList.get().getModContainerById(Constants.MOD_ID).get().getModInfo().getVersion().toString();
-        rawChannel =
-          NetworkRegistry.newSimpleChannel(new ResourceLocation(Constants.MOD_ID, "default"), () -> modVersion, str -> str.equals(modVersion), str -> str.equals(modVersion));
-    }
-
-    /**
-     * Get the network instance.
-     *
-     * @return the network channel instance.
-     */
-    public static Network getInstance()
-    {
-        if (instance == null)
-        {
-            instance = new Network();
-        }
-        return instance;
-    }
-
-    /**
-     * Get the underlying network channel.
-     *
-     * @return the network channel.
-     */
-    public SimpleChannel getChannel()
-    {
-        return rawChannel;
-    }
-
-    /**
-     * Register all network messages.
-     */
-    public void registerMessages()
-    {
-        rawChannel.registerMessage(1,
-          WidgetTriggerMessage.class,
-          WidgetTriggerMessage::toBytes,
-          WidgetTriggerMessage::fromBytes,
-          (message, context) -> message.onExecute(context.get()));
+        CHANNEL.messageBuilder(WidgetTriggerMessage.class, 0)
+            .encoder(WidgetTriggerMessage::toBytes)
+            .decoder(WidgetTriggerMessage::new)
+            .consumerMainThread(WidgetTriggerMessage::onExecute)
+            .add();
     }
 }

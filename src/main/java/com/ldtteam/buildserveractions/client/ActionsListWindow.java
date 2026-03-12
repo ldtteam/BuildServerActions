@@ -13,16 +13,16 @@ import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
 import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
-import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.network.Network;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
-import com.ldtteam.buildserveractions.registry.WidgetRegistries;
+import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
+import static com.ldtteam.buildserveractions.constants.Constants.modId;
 
 /**
  * Root GUI managing the actions list.
@@ -62,7 +62,7 @@ public class ActionsListWindow extends BOWindow
      */
     public ActionsListWindow(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
-        super(new ResourceLocation(Constants.MOD_ID, "gui/actionslist.xml"));
+        super(modId("gui/actionslist.xml"));
         this.attachedToScreen = attachedToScreen;
         this.layout = layout;
 
@@ -85,7 +85,7 @@ public class ActionsListWindow extends BOWindow
             final int currentPageOffset = pageId * this.widgetsInColumn;
 
             final View pageRoot = new View();
-            final ScrollingList list = (ScrollingList) Loader.createFromXMLFile2(new ResourceLocation(Constants.MOD_ID, "gui/actionspage.xml"), pageRoot);
+            final ScrollingList list = (ScrollingList) Loader.createFromXMLFile2(modId("gui/actionspage.xml"), pageRoot);
             pageRoot.setID("page" + pageId);
             pageRoot.setSize(maxContainerWidth, maxContainerHeight);
             pages.addChild(pageRoot);
@@ -111,7 +111,7 @@ public class ActionsListWindow extends BOWindow
                 {
                     for (int groupOffset = 0; groupOffset < widgetsInColumn; groupOffset++)
                     {
-                        final WidgetRegistries.Widget widget = WidgetManager.getInstance().getWidget(currentPageOffset + groupOffset, index);
+                        final Widget widget = WidgetManager.getInstance().getWidget(currentPageOffset + groupOffset, index);
                         if (widget == null)
                         {
                             continue;
@@ -126,7 +126,7 @@ public class ActionsListWindow extends BOWindow
                             button.setPosition(groupOffset * WIDGET_OFFSET, 0);
                             button.setSpacing(2);
                             button.setItem(widget.getIcon());
-                            button.setHandler(btn -> Network.getInstance().getChannel().sendToServer(new WidgetTriggerMessage(widget)));
+                            button.setHandler(btn -> Network.CHANNEL.sendToServer(new WidgetTriggerMessage(widget)));
 
                             ((View) rowPane).addChild(button);
                         }

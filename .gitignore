@@ -1,4 +1,5 @@
-.gradle
+# Gradle
+.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -10,6 +11,7 @@ build/
 *.iml
 *.ipr
 out/
+classes/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
@@ -18,12 +20,15 @@ out/
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
+.metadata/
 bin/
+eclipse/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+*.launch
 
 ### NetBeans ###
 /nbproject/private/
@@ -37,7 +42,26 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+**/.DS_Store
 
-### (Neo)forge files ###
-run
-runs
+### Windows ###
+Thumbs.db
+**/Thumbs.db
+
+### (Neo)Forge / Minecraft mod files ###
+run/
+runs/
+runData/
+runClient/
+runServer/
+logs/
+.cache/
+libs/
+
+### Generated / build artifacts ###
+*changelog.txt
+src/main/generated/resources/.cache/
+
+### Misc ###
+*.hprof
+README.txt

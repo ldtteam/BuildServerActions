@@ -1,20 +1,25 @@
 package com.ldtteam.buildserveractions.registry;
 
 import com.ldtteam.buildserveractions.constants.Constants;
-import com.ldtteam.buildserveractions.handlers.FlightSpeedWidgetCallbacks;
-import com.ldtteam.buildserveractions.handlers.GameModeWidgetCallbacks;
-import com.ldtteam.buildserveractions.handlers.ItemWidgetCallbacks;
-import com.ldtteam.buildserveractions.handlers.SetTimeWidgetCallbacks;
+import com.ldtteam.buildserveractions.handlers.*;
 import com.ldtteam.buildserveractions.registry.addons.DomumWidgets;
 import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
+import com.ldtteam.buildserveractions.util.VirtualContainerLevelAccess;
 import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.LoomMenu;
+import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.CraftingTableBlock;
+import net.minecraft.world.level.block.LoomBlock;
+import net.minecraft.world.level.block.SmithingTableBlock;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -24,6 +29,7 @@ import java.util.function.Consumer;
 import static com.ldtteam.buildserveractions.constants.Constants.modId;
 import static com.ldtteam.buildserveractions.handlers.FlightSpeedWidgetCallbacks.FLIGHT_SPEED_MULTIPLIER_KEY;
 import static com.ldtteam.buildserveractions.handlers.GameModeWidgetCallbacks.WIDGET_GAME_MODE_KEY;
+import static com.ldtteam.buildserveractions.handlers.OpenWindowWidgetCallback.WIDGET_WINDOW_MENU_PROVIDER;
 import static com.ldtteam.buildserveractions.handlers.SetTimeWidgetCallbacks.TIME_KEY;
 import static com.ldtteam.buildserveractions.registry.ModWidgetGroups.*;
 
@@ -56,6 +62,10 @@ public class ModWidgets
     public static final ResourceLocation ITEM_JIGSAW_BLOCK_ID         = modId("item-jigsaw-block");
     public static final ResourceLocation ITEM_STRUCTURE_BLOCK_ID      = modId("item-structure-block");
     public static final ResourceLocation ITEM_STRUCTURE_VOID_ID       = modId("item-structure-void");
+
+    public static final ResourceLocation WINDOW_CRAFTING_ID       = modId("window-crafting");
+    public static final ResourceLocation WINDOW_LOOM_ID           = modId("window-loom");
+    public static final ResourceLocation WINDOW_SMITHING_TABLE_ID = modId("window-smithing-table");
 
     public static final RegistryObject<Widget> GAMEMODE_SURVIVAL = register(GROUP_GAME_MODES_ID,
         GAMEMODE_SURVIVAL_ID,
@@ -186,6 +196,33 @@ public class ModWidgets
             .setDescription(ItemWidgetCallbacks::description)
             .setIcon(new ItemStack(Items.STRUCTURE_VOID))
             .setHandler(ItemWidgetCallbacks::handler));
+
+    public static final RegistryObject<Widget> WINDOW_CRAFTING = register(GROUP_WINDOWS_ID,
+        WINDOW_CRAFTING_ID,
+        builder -> builder.setName(OpenWindowWidgetCallback::name)
+            .setDescription(OpenWindowWidgetCallback::description)
+            .setIcon(new ItemStack(Items.CRAFTING_TABLE))
+            .setHandler(OpenWindowWidgetCallback::handler)
+            .addMetadata(WIDGET_WINDOW_MENU_PROVIDER,
+                new SimpleMenuProvider((id, inv, player) -> new CraftingMenu(id, inv, VirtualContainerLevelAccess.create(player)), CraftingTableBlock.CONTAINER_TITLE)));
+
+    public static final RegistryObject<Widget> WINDOW_LOOM = register(GROUP_WINDOWS_ID,
+        WINDOW_LOOM_ID,
+        builder -> builder.setName(OpenWindowWidgetCallback::name)
+            .setDescription(OpenWindowWidgetCallback::description)
+            .setIcon(new ItemStack(Items.LOOM))
+            .setHandler(OpenWindowWidgetCallback::handler)
+            .addMetadata(WIDGET_WINDOW_MENU_PROVIDER,
+                new SimpleMenuProvider((id, inv, player) -> new LoomMenu(id, inv, VirtualContainerLevelAccess.create(player)), LoomBlock.CONTAINER_TITLE)));
+
+    public static final RegistryObject<Widget> WINDOW_SMITHING_TABLE = register(GROUP_WINDOWS_ID,
+        WINDOW_SMITHING_TABLE_ID,
+        builder -> builder.setName(OpenWindowWidgetCallback::name)
+            .setDescription(OpenWindowWidgetCallback::description)
+            .setIcon(new ItemStack(Items.SMITHING_TABLE))
+            .setHandler(OpenWindowWidgetCallback::handler)
+            .addMetadata(WIDGET_WINDOW_MENU_PROVIDER,
+                new SimpleMenuProvider((id, inv, player) -> new SmithingMenu(id, inv, VirtualContainerLevelAccess.create(player)), SmithingTableBlock.CONTAINER_TITLE)));
     static
     {
         if (ModList.get().isLoaded("domum_ornamentum"))

@@ -7,6 +7,8 @@
 	"com.ldtteam.buildserveractions.widgets.flightspeed.10": "Set flight speed to x10",
 	"com.ldtteam.buildserveractions.widgets.item": "Give '%s'",
 	"com.ldtteam.buildserveractions.widgets.item.desc": "Give yourself one '%s'",
+    "com.ldtteam.buildserveractions.widgets.window": "Open %s window",
+    "com.ldtteam.buildserveractions.widgets.window.desc": "Opens a %s window",
 	"com.ldtteam.buildserveractions.widgets.domum_cutter": "Open the Architects Cutter",
 	"com.ldtteam.buildserveractions.widgets.domum_cutter.desc": "Open the Architects Cutter window directly for creating Domum Ornamentum items"
 }

@@ -38,7 +38,7 @@ public class ItemWidgetCallbacks
     }
 
     /**
-     * Action callback for switching game-modes.
+     * Action callback for giving a player an item.
      *
      * @param source the widget source.
      */

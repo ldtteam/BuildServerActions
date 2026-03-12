@@ -1,53 +1,71 @@
-# eclipse
-/bin
-*.launch
-/.settings
-/.metadata
-/.classpath
-/.project
-/eclipse
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# idea
-/out
-*.ipr
+### IntelliJ IDEA ###
+.idea/
 *.iws
 *.iml
-/.idea/*
-!/.idea
-!/.idea/inspectionProfiles/
-/.idea/gradle.xml
-/classes
+*.ipr
+out/
+classes/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# gradle
-/build
-/.gradle
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.metadata/
+bin/
+eclipse/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+*.launch
 
-# other
-/.vscode
-/run
-/runData
-/runClient
-/runServer
-.cache
-/libs
-gradle\.properties
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
-# Exclude all Mac DS_Store files
-/**/.DS_Store
+### VS Code ###
+.vscode/
 
-# Exclude all Windows stuff
-/**/Thumbs.db
+### Mac OS ###
+.DS_Store
+**/.DS_Store
 
-README.txt
-*.hprof
+### Windows ###
+Thumbs.db
+**/Thumbs.db
 
-# Build stuff
-*changelog.txt
-tools/export_lang/.api_key
-tools/fix_model_angle/*.class
-tools/fix_model_angle/*.class
-src/main/generated/resources/.cache/cache
-
+### (Neo)Forge / Minecraft mod files ###
+run/
+runs/
+runData/
+runClient/
+runServer/
 logs/
+.cache/
+libs/
+
+### Generated / build artifacts ###
+*changelog.txt
+src/main/generated/resources/.cache/
+
+### Local configuration ###
 gradle/local.gradle
 gradle/local.configuration.gradle
+
+### Misc ###
+*.hprof
+README.txt

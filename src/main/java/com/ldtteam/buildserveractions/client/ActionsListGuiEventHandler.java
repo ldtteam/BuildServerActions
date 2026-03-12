@@ -67,6 +67,7 @@ public class ActionsListGuiEventHandler
     {
         // Scroll events only work directly within the screen itself and are not bubbled up to the children.
         // So we have to manually forward it to the open GUI.
+        // If the mouse is over the BOScreen window, cancel the event to prevent the container screen from scrolling.
         final Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null)
         {
@@ -74,7 +75,15 @@ public class ActionsListGuiEventHandler
             {
                 if (child instanceof BOScreen attachedScreen)
                 {
+                    // Always forward the scroll event
                     attachedScreen.mouseScrolled(event.getMouseX(), event.getMouseY(), event.getScrollDelta());
+
+                    // Cancel if mouse is over the window, regardless of whether scrolling occurred
+                    if (attachedScreen.getWindow().wasCursorInPane())
+                    {
+                        event.setCanceled(true);
+                        return;
+                    }
                 }
             }
         }

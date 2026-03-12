@@ -16,8 +16,8 @@ public class TranslationConstants
     public static final String WIDGET_ITEM_NAME = "com.ldtteam.buildserveractions.widgets.item";
     public static final String WIDGET_ITEM_DESC = "com.ldtteam.buildserveractions.widgets.item.desc";
 
-    public static final String WIDGET_DOMUM_OPEN_CUTTER_NAME = "com.ldtteam.buildserveractions.widgets.domum_cutter";
-    public static final String WIDGET_DOMUM_OPEN_CUTTER_DESC = "com.ldtteam.buildserveractions.widgets.domum_cutter.desc";
+    public static final String WIDGET_OPEN_WINDOW_NAME = "com.ldtteam.buildserveractions.widgets.window";
+    public static final String WIDGET_OPEN_WINDOW_DESC = "com.ldtteam.buildserveractions.widgets.window.desc";
 
     private TranslationConstants()
     {

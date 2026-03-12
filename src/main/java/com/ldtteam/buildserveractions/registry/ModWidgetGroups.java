@@ -29,6 +29,7 @@ public class ModWidgetGroups
     public static final ResourceLocation GROUP_TIME_ID       = modId("group-time");
     public static final ResourceLocation GROUP_SPEED_ID      = modId("group-speed");
     public static final ResourceLocation GROUP_ITEMS_ID      = modId("group-items");
+    public static final ResourceLocation GROUP_WINDOWS_ID    = modId("group-windows");
 
     public static final DeferredHolder<WidgetGroup, WidgetGroup> GROUP_GAME_MODES =
         register(GROUP_GAME_MODES_ID, builder -> builder.setSorter(new GameModeWidgetCallbacks.GameModeSorter()));
@@ -40,6 +41,8 @@ public class ModWidgetGroups
         register(GROUP_SPEED_ID, builder -> builder.setSorter(Comparator.comparingInt(w -> w.getMetadataValue(FLIGHT_SPEED_MULTIPLIER_KEY, Number.class).intValue())));
 
     public static final DeferredHolder<WidgetGroup, WidgetGroup> GROUP_ITEMS = register(GROUP_ITEMS_ID);
+
+    public static final DeferredHolder<WidgetGroup, WidgetGroup> GROUP_WINDOWS = register(GROUP_WINDOWS_ID);
 
     /**
      * Register a widget group with an ID using default configuration.

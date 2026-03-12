@@ -1,12 +1,12 @@
 package com.ldtteam.buildserveractions.client.button;
 
 import com.ldtteam.blockui.BOGuiGraphics;
+import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-
-import static com.ldtteam.buildserveractions.util.ClockItemStackUtilities.TIME_VALUE_KEY;
 
 /**
  * Button class which renders a button, with an item as overlay over the button.
@@ -19,11 +19,14 @@ public final class ClockItemButton extends ItemButton
     @Override
     protected void preRender(final BOGuiGraphics ms, final double mx, final double my)
     {
-        if (itemStack.is(Items.CLOCK) && itemStack.getTag() != null && itemStack.getTag().contains(TIME_VALUE_KEY) && mc.level != null)
+        if (itemStack.is(Items.CLOCK) && mc.level != null)
         {
-            final float timeValue = itemStack.getTag().getFloat(TIME_VALUE_KEY);
-            initialFunction = ItemProperties.getProperty(Items.CLOCK, ResourceLocation.parse("time"));
-            ItemProperties.register(Items.CLOCK, ResourceLocation.parse("time"), (pStack, pLevel, pEntity, pSeed) -> timeValue);
+            final float timeValue = ClockItemStackUtilities.getTimeValue(itemStack);
+            if (timeValue >= 0)
+            {
+                initialFunction = ItemProperties.getProperty(itemStack, ResourceLocation.parse("time"));
+                ItemProperties.register(Items.CLOCK, ResourceLocation.parse("time"), (pStack, pLevel, pEntity, pSeed) -> timeValue);
+            }
         }
     }
 

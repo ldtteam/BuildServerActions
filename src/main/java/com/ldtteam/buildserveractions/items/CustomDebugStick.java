@@ -1,19 +1,20 @@
 package com.ldtteam.buildserveractions.items;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DebugStickItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -29,48 +30,46 @@ public class CustomDebugStick extends DebugStickItem
     }
 
     @Override
-    protected boolean handleInteraction(
-        @NotNull Player pPlayer,
-        BlockState pStateClicked,
-        @NotNull LevelAccessor pAccessor,
-        @NotNull BlockPos pPos,
-        boolean pShouldCycleState,
-        @NotNull ItemStack pDebugStack)
+    protected boolean handleInteraction(Player player, BlockState stateClicked, LevelAccessor accessor, BlockPos pos, boolean shouldCycleState, ItemStack debugStack)
     {
-        Block block = pStateClicked.getBlock();
-        StateDefinition<Block, BlockState> statedefinition = block.getStateDefinition();
+        Holder<Block> holder = stateClicked.getBlockHolder();
+        StateDefinition<Block, BlockState> statedefinition = holder.value().getStateDefinition();
         Collection<Property<?>> collection = statedefinition.getProperties();
-        String s = ForgeRegistries.BLOCKS.getKey(block).toString();
         if (collection.isEmpty())
         {
-            message(pPlayer, Component.translatable(this.getDescriptionId() + ".empty", s));
+            message(player, Component.translatable(this.getDescriptionId() + ".empty", holder.getRegisteredName()));
             return false;
         }
         else
         {
-            CompoundTag compoundtag = pDebugStack.getOrCreateTagElement("DebugProperty");
-            String s1 = compoundtag.getString(s);
-            Property<?> property = statedefinition.getProperty(s1);
-            if (pShouldCycleState)
+            DebugStickState debugstickstate = debugStack.get(DataComponents.DEBUG_STICK_STATE);
+            if (debugstickstate == null)
             {
-                if (property == null)
-                {
-                    property = collection.iterator().next();
-                }
-
-                BlockState blockstate = cycleState(pStateClicked, property, pPlayer.isSecondaryUseActive());
-                pAccessor.setBlock(pPos, blockstate, 18);
-                message(pPlayer, Component.translatable(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockstate, property)));
+                return false;
             }
             else
             {
-                property = getRelative(collection, property, pPlayer.isSecondaryUseActive());
-                String s2 = property.getName();
-                compoundtag.putString(s, s2);
-                message(pPlayer, Component.translatable(this.getDescriptionId() + ".select", s2, getNameHelper(pStateClicked, property)));
-            }
+                Property<?> property = debugstickstate.properties().get(holder);
+                if (shouldCycleState)
+                {
+                    if (property == null)
+                    {
+                        property = collection.iterator().next();
+                    }
 
-            return true;
+                    BlockState blockstate = cycleState(stateClicked, property, player.isSecondaryUseActive());
+                    accessor.setBlock(pos, blockstate, 18);
+                    message(player, Component.translatable(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockstate, property)));
+                }
+                else
+                {
+                    property = getRelative(collection, property, player.isSecondaryUseActive());
+                    debugStack.set(DataComponents.DEBUG_STICK_STATE, debugstickstate.withProperty(holder, property));
+                    message(player, Component.translatable(this.getDescriptionId() + ".select", property.getName(), getNameHelper(stateClicked, property)));
+                }
+
+                return true;
+            }
         }
     }
 

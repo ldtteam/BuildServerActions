@@ -1,53 +1,43 @@
-# eclipse
-/bin
-*.launch
-/.settings
-/.metadata
-/.classpath
-/.project
-/eclipse
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# idea
-/out
-*.ipr
+### IntelliJ IDEA ###
+.idea/
 *.iws
 *.iml
-/.idea/*
-!/.idea
-!/.idea/inspectionProfiles/
-/.idea/gradle.xml
-/classes
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# gradle
-/build
-/.gradle
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
-# other
-/.vscode
-/run
-/runData
-/runClient
-/runServer
-.cache
-/libs
-gradle\.properties
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
-# Exclude all Mac DS_Store files
-/**/.DS_Store
+### VS Code ###
+.vscode/
 
-# Exclude all Windows stuff
-/**/Thumbs.db
+### Mac OS ###
+.DS_Store
 
-README.txt
-*.hprof
-
-# Build stuff
-*changelog.txt
-tools/export_lang/.api_key
-tools/fix_model_angle/*.class
-tools/fix_model_angle/*.class
-src/main/generated/resources/.cache/cache
-
-logs/
-gradle/local.gradle
-gradle/local.configuration.gradle
+### (Neo)forge files ###
+run
+runs

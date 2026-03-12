@@ -3,22 +3,25 @@ package com.ldtteam.buildserveractions.client;
 import com.ldtteam.blockui.BOScreen;
 import com.ldtteam.buildserveractions.LayoutManager;
 import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
-import com.ldtteam.buildserveractions.constants.Constants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 
 /**
  * Handles all GUI events.
  */
-@Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ActionsListGuiEventHandler
 {
+    /**
+     * Z-level offset for rendering the attached BlockUI screen above container screen items.
+     * Container screens render items at z-levels around 100-250, so we use 400 to ensure
+     * our tooltips and UI elements render above them.
+     */
+    private static final int ATTACHED_SCREEN_Z_OFFSET = 400;
+
     private ActionsListGuiEventHandler()
     {
     }
@@ -42,13 +45,27 @@ public class ActionsListGuiEventHandler
     }
 
     @SubscribeEvent
-    public static void onClientTick(final TickEvent.ClientTickEvent event)
+    public static void onScreenRender(final ScreenEvent.Render.Post event)
     {
-        if (!event.phase.equals(TickEvent.Phase.END) || !event.side.isClient())
+        // BOScreen.render() is only called when it's the main screen, not when added as a child listener.
+        // We need to manually render it after the container screen renders.
+        // Push the z-level higher so tooltips render above the container screen's items.
+        for (GuiEventListener child : event.getScreen().children())
         {
-            return;
+            if (child instanceof BOScreen attachedScreen)
+            {
+                final var pose = event.getGuiGraphics().pose();
+                pose.pushPose();
+                pose.translate(0, 0, ATTACHED_SCREEN_Z_OFFSET);
+                attachedScreen.render(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+                pose.popPose();
+            }
         }
+    }
 
+    @SubscribeEvent
+    public static void onClientTick(final ClientTickEvent.Post event)
+    {
         final Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null)
         {
@@ -67,6 +84,7 @@ public class ActionsListGuiEventHandler
     {
         // Scroll events only work directly within the screen itself and are not bubbled up to the children.
         // So we have to manually forward it to the open GUI.
+        // If the mouse is over the BOScreen window, cancel the event to prevent the container screen from scrolling.
         final Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null)
         {
@@ -74,7 +92,15 @@ public class ActionsListGuiEventHandler
             {
                 if (child instanceof BOScreen attachedScreen)
                 {
-                    attachedScreen.mouseScrolled(event.getMouseX(), event.getMouseY(), event.getScrollDelta());
+                    // Always forward the scroll event
+                    attachedScreen.mouseScrolled(event.getMouseX(), event.getMouseY(), event.getScrollDeltaX(), event.getScrollDeltaY());
+
+                    // Cancel if mouse is over the window, regardless of whether scrolling occurred
+                    if (attachedScreen.getWindow().wasCursorInPane())
+                    {
+                        event.setCanceled(true);
+                        return;
+                    }
                 }
             }
         }

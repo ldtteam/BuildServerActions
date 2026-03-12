@@ -9,15 +9,17 @@ import com.ldtteam.buildserveractions.registry.addons.DomumWidgets;
 import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
 import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Consumer;
 
@@ -57,7 +59,7 @@ public class ModWidgets
     public static final ResourceLocation ITEM_STRUCTURE_BLOCK_ID      = modId("item-structure-block");
     public static final ResourceLocation ITEM_STRUCTURE_VOID_ID       = modId("item-structure-void");
 
-    public static final RegistryObject<Widget> GAMEMODE_SURVIVAL = register(GROUP_GAME_MODES_ID,
+    public static final DeferredHolder<Widget, Widget> GAMEMODE_SURVIVAL = register(GROUP_GAME_MODES_ID,
         GAMEMODE_SURVIVAL_ID,
         builder -> builder.setName(GameModeWidgetCallbacks::name)
             .setDescription(GameModeWidgetCallbacks::description)
@@ -65,7 +67,7 @@ public class ModWidgets
             .setHandler(GameModeWidgetCallbacks::handler)
             .addMetadata(WIDGET_GAME_MODE_KEY, GameType.SURVIVAL));
 
-    public static final RegistryObject<Widget> GAMEMODE_CREATIVE = register(GROUP_GAME_MODES_ID,
+    public static final DeferredHolder<Widget, Widget> GAMEMODE_CREATIVE = register(GROUP_GAME_MODES_ID,
         GAMEMODE_CREATIVE_ID,
         builder -> builder.setName(GameModeWidgetCallbacks::name)
             .setDescription(GameModeWidgetCallbacks::description)
@@ -73,7 +75,7 @@ public class ModWidgets
             .setHandler(GameModeWidgetCallbacks::handler)
             .addMetadata(WIDGET_GAME_MODE_KEY, GameType.CREATIVE));
 
-    public static final RegistryObject<Widget> GAMEMODE_SPECTATOR = register(GROUP_GAME_MODES_ID,
+    public static final DeferredHolder<Widget, Widget> GAMEMODE_SPECTATOR = register(GROUP_GAME_MODES_ID,
         GAMEMODE_SPECTATOR_ID,
         builder -> builder.setName(GameModeWidgetCallbacks::name)
             .setDescription(GameModeWidgetCallbacks::description)
@@ -81,7 +83,7 @@ public class ModWidgets
             .setHandler(GameModeWidgetCallbacks::handler)
             .addMetadata(WIDGET_GAME_MODE_KEY, GameType.SPECTATOR));
 
-    public static final RegistryObject<Widget> GAMEMODE_ADVENTURE = register(GROUP_GAME_MODES_ID,
+    public static final DeferredHolder<Widget, Widget> GAMEMODE_ADVENTURE = register(GROUP_GAME_MODES_ID,
         GAMEMODE_ADVENTURE_ID,
         builder -> builder.setName(GameModeWidgetCallbacks::name)
             .setDescription(GameModeWidgetCallbacks::description)
@@ -89,75 +91,75 @@ public class ModWidgets
             .setHandler(GameModeWidgetCallbacks::handler)
             .addMetadata(WIDGET_GAME_MODE_KEY, GameType.ADVENTURE));
 
-    public static final RegistryObject<Widget> TIME_NOON = register(GROUP_TIME_ID,
+    public static final DeferredHolder<Widget, Widget> TIME_NOON = register(GROUP_TIME_ID,
         TIME_NOON_ID,
         builder -> builder.setName(SetTimeWidgetCallbacks::name)
             .setIcon(ClockItemStackUtilities.createItemStack(0))
             .setHandler(SetTimeWidgetCallbacks::handler)
             .addMetadata(TIME_KEY, 6000));
 
-    public static final RegistryObject<Widget> TIME_MIDNIGHT = register(GROUP_TIME_ID,
+    public static final DeferredHolder<Widget, Widget> TIME_MIDNIGHT = register(GROUP_TIME_ID,
         TIME_MIDNIGHT_ID,
         builder -> builder.setName(SetTimeWidgetCallbacks::name)
             .setIcon(ClockItemStackUtilities.createItemStack(0.5f))
             .setHandler(SetTimeWidgetCallbacks::handler)
             .addMetadata(TIME_KEY, 18000));
 
-    public static final RegistryObject<Widget> SPEED_01 = register(GROUP_SPEED_ID,
+    public static final DeferredHolder<Widget, Widget> SPEED_01 = register(GROUP_SPEED_ID,
         SPEED_01_ID,
         builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
             .setIcon(new ItemStack(Items.LEATHER_BOOTS))
             .setHandler(FlightSpeedWidgetCallbacks::handler)
             .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 1));
 
-    public static final RegistryObject<Widget> SPEED_02 = register(GROUP_SPEED_ID,
+    public static final DeferredHolder<Widget, Widget> SPEED_02 = register(GROUP_SPEED_ID,
         SPEED_02_ID,
         builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
             .setIcon(new ItemStack(Items.IRON_BOOTS))
             .setHandler(FlightSpeedWidgetCallbacks::handler)
             .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 2));
 
-    public static final RegistryObject<Widget> SPEED_05 = register(GROUP_SPEED_ID,
+    public static final DeferredHolder<Widget, Widget> SPEED_05 = register(GROUP_SPEED_ID,
         SPEED_05_ID,
         builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
             .setIcon(new ItemStack(Items.GOLDEN_BOOTS))
             .setHandler(FlightSpeedWidgetCallbacks::handler)
             .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 5));
 
-    public static final RegistryObject<Widget> SPEED_10 = register(GROUP_SPEED_ID,
+    public static final DeferredHolder<Widget, Widget> SPEED_10 = register(GROUP_SPEED_ID,
         SPEED_10_ID,
         builder -> builder.setName(FlightSpeedWidgetCallbacks::name)
             .setIcon(new ItemStack(Items.DIAMOND_BOOTS))
             .setHandler(FlightSpeedWidgetCallbacks::handler)
             .addMetadata(FLIGHT_SPEED_MULTIPLIER_KEY, 10));
 
-    public static final RegistryObject<Widget> ITEM_BARRIER_BLOCK = register(GROUP_ITEMS_ID,
+    public static final DeferredHolder<Widget, Widget> ITEM_BARRIER_BLOCK = register(GROUP_ITEMS_ID,
         ITEM_BARRIER_BLOCK_ID,
         builder -> builder.setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
             .setIcon(new ItemStack(Items.BARRIER))
             .setHandler(ItemWidgetCallbacks::handler));
 
-    public static final RegistryObject<Widget> ITEM_COMMAND_BLOCK = register(GROUP_ITEMS_ID,
+    public static final DeferredHolder<Widget, Widget> ITEM_COMMAND_BLOCK = register(GROUP_ITEMS_ID,
         ITEM_COMMAND_BLOCK_ID,
         builder -> builder.setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
             .setIcon(new ItemStack(Items.COMMAND_BLOCK))
             .setHandler(ItemWidgetCallbacks::handler));
 
-    public static final RegistryObject<Widget> ITEM_DEBUG_STICK = register(GROUP_ITEMS_ID,
+    public static final DeferredHolder<Widget, Widget> ITEM_DEBUG_STICK = register(GROUP_ITEMS_ID,
         ITEM_DEBUG_STICK_ID,
         builder -> builder.setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
             .setIcon(new ItemStack(ModItems.DEBUG_STICK.get()))
             .setHandler(ItemWidgetCallbacks::handler));
 
-    public static final RegistryObject<Widget> ITEM_INVISIBLE_ITEM_FRAME = DEFERRED_REGISTER.register(ITEM_INVISIBLE_ITEM_FRAME_ID.getPath(), () -> {
+    public static final DeferredHolder<Widget, Widget> ITEM_INVISIBLE_ITEM_FRAME = DEFERRED_REGISTER.register(ITEM_INVISIBLE_ITEM_FRAME_ID.getPath(), () -> {
         final ItemStack invisibleItemFrame = new ItemStack(Items.ITEM_FRAME);
-        final CompoundTag invisibleItemFrameTag = invisibleItemFrame.getOrCreateTag();
-        final CompoundTag invisibleItemFrameEntityTag = new CompoundTag();
-        invisibleItemFrameEntityTag.putBoolean("Invisible", true);
-        invisibleItemFrameTag.put("EntityTag", invisibleItemFrameEntityTag);
+        final CompoundTag entityTag = new CompoundTag();
+        entityTag.putString("id", "minecraft:item_frame");
+        entityTag.putBoolean("Invisible", true);
+        invisibleItemFrame.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag));
 
         return new Widget.Builder(GROUP_ITEMS_ID, ITEM_INVISIBLE_ITEM_FRAME_ID).setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
@@ -166,21 +168,21 @@ public class ModWidgets
             .build();
     });
 
-    public static final RegistryObject<Widget> ITEM_JIGSAW_BLOCK = register(GROUP_ITEMS_ID,
+    public static final DeferredHolder<Widget, Widget> ITEM_JIGSAW_BLOCK = register(GROUP_ITEMS_ID,
         ITEM_JIGSAW_BLOCK_ID,
         builder -> builder.setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
             .setIcon(new ItemStack(Items.JIGSAW))
             .setHandler(ItemWidgetCallbacks::handler));
 
-    public static final RegistryObject<Widget> ITEM_STRUCTURE_BLOCK = register(GROUP_ITEMS_ID,
+    public static final DeferredHolder<Widget, Widget> ITEM_STRUCTURE_BLOCK = register(GROUP_ITEMS_ID,
         ITEM_STRUCTURE_BLOCK_ID,
         builder -> builder.setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
             .setIcon(new ItemStack(Items.STRUCTURE_BLOCK))
             .setHandler(ItemWidgetCallbacks::handler));
 
-    public static final RegistryObject<Widget> ITEM_STRUCTURE_VOID = register(GROUP_ITEMS_ID,
+    public static final DeferredHolder<Widget, Widget> ITEM_STRUCTURE_VOID = register(GROUP_ITEMS_ID,
         ITEM_STRUCTURE_VOID_ID,
         builder -> builder.setName(ItemWidgetCallbacks::name)
             .setDescription(ItemWidgetCallbacks::description)
@@ -201,7 +203,7 @@ public class ModWidgets
      * @param configurator a consumer to configure the builder.
      * @return the registry object.
      */
-    public static RegistryObject<Widget> register(final ResourceLocation groupId, final ResourceLocation widgetId, final Consumer<Widget.Builder> configurator)
+    public static DeferredHolder<Widget, Widget> register(final ResourceLocation groupId, final ResourceLocation widgetId, final Consumer<Widget.Builder> configurator)
     {
         return DEFERRED_REGISTER.register(widgetId.getPath(), () -> {
             final Widget.Builder builder = new Widget.Builder(groupId, widgetId);

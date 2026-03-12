@@ -1,39 +1,44 @@
 package com.ldtteam.buildserveractions.network;
 
-import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.WidgetSource;
+import com.ldtteam.buildserveractions.registry.ModWidgets;
 import com.ldtteam.buildserveractions.widget.Widget;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import static com.ldtteam.buildserveractions.constants.Constants.modId;
 
 /**
  * Message for triggering a widget.
  */
-public class WidgetTriggerMessage
+public record WidgetTriggerMessage(Widget clickedWidget) implements CustomPacketPayload
 {
-    private final Widget clickedWidget;
+    public static final Type<WidgetTriggerMessage> TYPE = new Type<>(modId("widget_trigger"));
 
-    public WidgetTriggerMessage(final Widget clickedWidget)
+    public static final StreamCodec<RegistryFriendlyByteBuf, WidgetTriggerMessage> STREAM_CODEC =
+        ByteBufCodecs.registry(ModWidgets.REGISTRY_KEY)
+            .map(WidgetTriggerMessage::new, WidgetTriggerMessage::clickedWidget);
+
+    public static void handle(final WidgetTriggerMessage msg, final IPayloadContext context)
     {
-        this.clickedWidget = clickedWidget;
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer)
+            {
+                final WidgetSource source = new WidgetSource(msg.clickedWidget, serverPlayer);
+                msg.clickedWidget.getHandler().accept(source);
+            }
+        });
     }
 
-    public WidgetTriggerMessage(final FriendlyByteBuf buf)
+    @Override
+    @NotNull
+    public Type<? extends CustomPacketPayload> type()
     {
-        this.clickedWidget = WidgetManager.getInstance().readWidgetFromBuffer(buf);
-    }
-
-    public void toBytes(final FriendlyByteBuf buf)
-    {
-        WidgetManager.getInstance().writeWidgetToBuffer(buf, this.clickedWidget);
-    }
-
-    public void onExecute(final Supplier<Context> contextSupplier)
-    {
-        final Context context = contextSupplier.get();
-        final WidgetSource source = new WidgetSource(this.clickedWidget, context.getSender());
-        this.clickedWidget.getHandler().accept(source);
+        return TYPE;
     }
 }

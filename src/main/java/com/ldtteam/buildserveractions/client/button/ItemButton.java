@@ -1,7 +1,7 @@
 package com.ldtteam.buildserveractions.client.button;
 
 import com.ldtteam.blockui.BOGuiGraphics;
-import com.ldtteam.blockui.controls.ButtonVanilla;
+import com.ldtteam.blockui.controls.ButtonImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.item.ItemStack;
@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Button class which renders a button, with an item as overlay over the button.
  */
-public class ItemButton extends ButtonVanilla
+public class ItemButton extends ButtonImage
 {
     /**
      * The item stack to render.

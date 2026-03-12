@@ -2,10 +2,9 @@ package com.ldtteam.buildserveractions;
 
 import com.ldtteam.buildserveractions.widget.Widget;
 import com.ldtteam.buildserveractions.widget.WidgetGroup;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,13 +25,13 @@ public class WidgetManager
      * The forge registry containing all the widget groups.
      */
     @Nullable
-    private IForgeRegistry<WidgetGroup> widgetGroups;
+    private Registry<WidgetGroup> widgetGroups;
 
     /**
      * The forge registry containing all the widgets.
      */
     @Nullable
-    private IForgeRegistry<Widget> widgets;
+    private Registry<Widget> widgets;
 
     /**
      * Obtain the {@link WidgetManager} instance.
@@ -53,7 +52,7 @@ public class WidgetManager
      *
      * @param registry the registry.
      */
-    void setWidgetGroupRegistry(final IForgeRegistry<WidgetGroup> registry)
+    void setWidgetGroupRegistry(final Registry<WidgetGroup> registry)
     {
         this.widgetGroups = registry;
     }
@@ -63,41 +62,9 @@ public class WidgetManager
      *
      * @param registry the registry.
      */
-    void setWidgetRegistry(final IForgeRegistry<Widget> registry)
+    void setWidgetRegistry(final Registry<Widget> registry)
     {
         this.widgets = registry;
-    }
-
-    /**
-     * Writes a widget
-     *
-     * @param buf network data byte buffer.
-     * @return the widget, or null if a problem occurred on the sending side.
-     */
-    public Widget readWidgetFromBuffer(final FriendlyByteBuf buf)
-    {
-        if (buf.readBoolean())
-        {
-            return buf.readRegistryIdSafe(Widget.class);
-        }
-        return null;
-    }
-
-    /**
-     * Writes a widget to a network data byte buffer.
-     *
-     * @param buf    network data byte buffer.
-     * @param widget the widget to write.
-     */
-    public void writeWidgetToBuffer(final FriendlyByteBuf buf, final Widget widget)
-    {
-        if (this.widgets == null || widget == null)
-        {
-            buf.writeBoolean(false);
-            return;
-        }
-        buf.writeBoolean(true);
-        buf.writeRegistryId(this.widgets, widget);
     }
 
     /**
@@ -111,7 +78,7 @@ public class WidgetManager
         {
             return 0;
         }
-        return this.widgetGroups.getKeys().size();
+        return this.widgetGroups.keySet().size();
     }
 
     /**
@@ -125,7 +92,7 @@ public class WidgetManager
         {
             return 0;
         }
-        final Map<ResourceLocation, List<Widget>> grouped = this.widgets.getValues().stream().collect(Collectors.groupingBy(Widget::getGroupId));
+        final Map<ResourceLocation, List<Widget>> grouped = this.widgets.stream().collect(Collectors.groupingBy(Widget::getGroupId));
         return grouped.values().stream().mapToInt(List::size).max().orElse(0);
     }
 
@@ -146,8 +113,8 @@ public class WidgetManager
 
         try
         {
-            final Map.Entry<ResourceKey<WidgetGroup>, WidgetGroup> group = this.widgetGroups.getEntries().stream().sorted(Map.Entry.comparingByKey()).toList().get(groupIndex);
-            return this.widgets.getEntries()
+            final Map.Entry<ResourceKey<WidgetGroup>, WidgetGroup> group = this.widgetGroups.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList().get(groupIndex);
+            return this.widgets.entrySet()
                 .stream()
                 .filter(f -> f.getValue().getGroupId().equals(group.getValue().getId()))
                 .sorted((s1, s2) -> group.getValue().getWidgetSorter().compare(s1.getValue(), s2.getValue()))

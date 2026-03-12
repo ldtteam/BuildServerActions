@@ -3,7 +3,7 @@ package com.ldtteam.buildserveractions.client;
 import com.ldtteam.blockui.Loader;
 import com.ldtteam.blockui.Pane;
 import com.ldtteam.blockui.controls.AbstractTextBuilder;
-import com.ldtteam.blockui.controls.ImageRepeatable;
+import com.ldtteam.blockui.controls.Image;
 import com.ldtteam.blockui.views.BOWindow;
 import com.ldtteam.blockui.views.ScrollingList;
 import com.ldtteam.blockui.views.ScrollingListContainer.RowSizeModifier;
@@ -13,8 +13,8 @@ import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
 import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
-import com.ldtteam.buildserveractions.network.Network;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
+import net.neoforged.neoforge.network.PacketDistributor;
 import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -72,7 +72,7 @@ public class ActionsListWindow extends BOWindow
         final int widgetsInRow = Math.min(WidgetManager.getInstance().getWidgetGroupCount(), layout.getMaxGroups());
         this.widgetsInColumn = WidgetManager.getInstance().getMaxWidgetCountInGroup();
 
-        final ImageRepeatable background = findPaneOfTypeByID("background", ImageRepeatable.class);
+        final Image background = findPaneOfTypeByID("background", Image.class);
         final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
 
         final int maxContainerWidth = widgetsInRow * WIDGET_OFFSET - WIDGET_SPACING + SCROLLBAR_WIDTH;
@@ -85,7 +85,7 @@ public class ActionsListWindow extends BOWindow
             final int currentPageOffset = pageId * this.widgetsInColumn;
 
             final View pageRoot = new View();
-            final ScrollingList list = (ScrollingList) Loader.createFromXMLFile2(modId("gui/actionspage.xml"), pageRoot);
+            final ScrollingList list = (ScrollingList) Loader.createFromXMLFile(modId("gui/actionspage.xml"), pageRoot);
             pageRoot.setID("page" + pageId);
             pageRoot.setSize(maxContainerWidth, maxContainerHeight);
             pages.addChild(pageRoot);
@@ -126,7 +126,7 @@ public class ActionsListWindow extends BOWindow
                             button.setPosition(groupOffset * WIDGET_OFFSET, 0);
                             button.setSpacing(2);
                             button.setItem(widget.getIcon());
-                            button.setHandler(btn -> Network.CHANNEL.sendToServer(new WidgetTriggerMessage(widget)));
+                            button.setHandler(btn -> PacketDistributor.sendToServer(new WidgetTriggerMessage(widget)));
 
                             ((View) rowPane).addChild(button);
                         }

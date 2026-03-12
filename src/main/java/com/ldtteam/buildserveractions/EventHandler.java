@@ -1,46 +1,55 @@
 package com.ldtteam.buildserveractions;
 
+import com.ldtteam.blockui.AtlasManager;
 import com.ldtteam.buildserveractions.constants.Constants;
-import com.ldtteam.buildserveractions.network.Network;
+import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.ModWidgetGroups;
 import com.ldtteam.buildserveractions.registry.ModWidgets;
-import com.ldtteam.buildserveractions.widget.Widget;
-import com.ldtteam.buildserveractions.widget.WidgetGroup;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Event handler class for the mod code.
  */
-@Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EventHandler
 {
     /**
-     * Event handler for forge pre init event.
+     * Event handler for the payload registers.
      *
-     * @param event the forge pre init event.
+     * @param event the event.
      */
     @SubscribeEvent
-    public static void preInit(@NotNull final FMLCommonSetupEvent event)
+    public static void registerPayloadHandlers(@NotNull final RegisterPayloadHandlersEvent event)
     {
-        Network.register();
+        final PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToServer(WidgetTriggerMessage.TYPE, WidgetTriggerMessage.STREAM_CODEC, WidgetTriggerMessage::handle);
     }
 
+    /**
+     * Register the registries used by the mod.
+     *
+     * @param event the event.
+     */
     @SubscribeEvent
     public static void registerNewRegistries(final NewRegistryEvent event)
     {
-        event.create(new RegistryBuilder<WidgetGroup>().setName(ModWidgetGroups.REGISTRY_KEY.location())
-            .disableSaving()
-            .allowModification()
-            .setIDRange(0, Integer.MAX_VALUE - 1), WidgetManager.getInstance()::setWidgetGroupRegistry);
+        WidgetManager.getInstance().setWidgetRegistry(event.create(new RegistryBuilder<>(ModWidgets.REGISTRY_KEY).sync(true)));
+        WidgetManager.getInstance().setWidgetGroupRegistry(event.create(new RegistryBuilder<>(ModWidgetGroups.REGISTRY_KEY).sync(true)));
+    }
 
-        event.create(new RegistryBuilder<Widget>().setName(ModWidgets.REGISTRY_KEY.location())
-            .disableSaving()
-            .allowModification()
-            .setIDRange(0, Integer.MAX_VALUE - 1), WidgetManager.getInstance()::setWidgetRegistry);
+    /**
+     * Register client reload listeners for the atlas.
+     *
+     * @param event the event.
+     */
+    @SubscribeEvent
+    public static void registerClientReloadListeners(final RegisterClientReloadListenersEvent event)
+    {
+        AtlasManager.INSTANCE.addAtlas(event::registerReloadListener, Constants.MOD_ID);
     }
 }

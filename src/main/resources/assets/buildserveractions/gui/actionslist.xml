@@ -2,7 +2,7 @@
         lightbox="false"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ldtteam/BlockUI/version/main/src/main/resources/assets/blockui/gui/block_ui.xsd"
         type="VANILLA">
-    <imagerepeat id="background" source="buildserveractions:textures/gui/background.png" textureoffset="0 0" texturesize="18 18" repeatoffset="6 6" repeatsize="6 6"/>
+    <image id="background" source="buildserveractions:background"/>
 
     <switch id="pages" pos="6 16"/>
 </window>

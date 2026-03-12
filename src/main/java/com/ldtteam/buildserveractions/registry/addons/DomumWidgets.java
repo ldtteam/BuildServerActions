@@ -8,7 +8,7 @@ import com.ldtteam.buildserveractions.widget.WidgetGroup;
 import com.ldtteam.domumornamentum.block.ModBlocks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import static com.ldtteam.buildserveractions.constants.Constants.modId;
 import static com.ldtteam.buildserveractions.constants.TranslationConstants.WIDGET_DOMUM_OPEN_CUTTER_DESC;
@@ -24,9 +24,9 @@ public class DomumWidgets
     public static final ResourceLocation GROUP_DOMUM_ID       = modId("group-domum-ornamentum");
     public static final ResourceLocation DOMUM_OPEN_CUTTER_ID = modId("domum-open-cutter");
 
-    public static final RegistryObject<WidgetGroup> GROUP_DOMUM = ModWidgetGroups.register(GROUP_DOMUM_ID);
+    public static final DeferredHolder<WidgetGroup, WidgetGroup> GROUP_DOMUM = ModWidgetGroups.register(GROUP_DOMUM_ID);
 
-    public static final RegistryObject<Widget> DOMUM_OPEN_CUTTER = ModWidgets.register(GROUP_DOMUM_ID, DOMUM_OPEN_CUTTER_ID,
+    public static final DeferredHolder<Widget, Widget> DOMUM_OPEN_CUTTER = ModWidgets.register(GROUP_DOMUM_ID, DOMUM_OPEN_CUTTER_ID,
         builder -> builder
             .setName(Component.translatable(WIDGET_DOMUM_OPEN_CUTTER_NAME))
             .setDescription(Component.translatable(WIDGET_DOMUM_OPEN_CUTTER_DESC))

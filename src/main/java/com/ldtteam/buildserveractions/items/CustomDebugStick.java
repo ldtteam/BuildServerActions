@@ -2,6 +2,7 @@ package com.ldtteam.buildserveractions.items;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -71,6 +72,13 @@ public class CustomDebugStick extends DebugStickItem
                 return true;
             }
         }
+    }
+
+    @Override
+    @NotNull
+    public DataComponentMap components()
+    {
+        return Items.DEBUG_STICK.components();
     }
 
     @Override

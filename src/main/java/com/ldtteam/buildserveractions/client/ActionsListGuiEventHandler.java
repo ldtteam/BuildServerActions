@@ -45,11 +45,12 @@ public class ActionsListGuiEventHandler
     }
 
     @SubscribeEvent
-    public static void onScreenRender(final ScreenEvent.Render.Post event)
+    public static void onScreenRender(final ScreenEvent.Render.Pre event)
     {
         // BOScreen.render() is only called when it's the main screen, not when added as a child listener.
-        // We need to manually render it after the container screen renders.
-        // Push the z-level higher so tooltips render above the container screen's items.
+        // We need to manually render it. Using Render.Pre ensures we render before vanilla tooltips,
+        // so our z-offset doesn't obscure tooltip text.
+        // Push the z-level higher so our UI renders above the container screen's items.
         for (GuiEventListener child : event.getScreen().children())
         {
             if (child instanceof BOScreen attachedScreen)

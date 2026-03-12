@@ -1,12 +1,9 @@
 package com.ldtteam.buildserveractions;
 
-import com.ldtteam.blockui.AtlasManager;
-import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.ModWidgetGroups;
 import com.ldtteam.buildserveractions.registry.ModWidgets;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
@@ -42,14 +39,4 @@ public class EventHandler
         WidgetManager.getInstance().setWidgetGroupRegistry(event.create(new RegistryBuilder<>(ModWidgetGroups.REGISTRY_KEY).sync(true)));
     }
 
-    /**
-     * Register client reload listeners for the atlas.
-     *
-     * @param event the event.
-     */
-    @SubscribeEvent
-    public static void registerClientReloadListeners(final RegisterClientReloadListenersEvent event)
-    {
-        AtlasManager.INSTANCE.addAtlas(event::registerReloadListener, Constants.MOD_ID);
-    }
 }

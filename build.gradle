@@ -19,6 +19,13 @@ base {
     archivesName = mod_id
 }
 
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 dependencies {

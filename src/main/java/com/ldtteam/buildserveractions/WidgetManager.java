@@ -52,7 +52,7 @@ public class WidgetManager
      *
      * @param registry the registry.
      */
-    void setWidgetGroupRegistry(final Registry<WidgetGroup> registry)
+    public void setWidgetGroupRegistry(final Registry<WidgetGroup> registry)
     {
         this.widgetGroups = registry;
     }
@@ -62,7 +62,7 @@ public class WidgetManager
      *
      * @param registry the registry.
      */
-    void setWidgetRegistry(final Registry<Widget> registry)
+    public void setWidgetRegistry(final Registry<Widget> registry)
     {
         this.widgets = registry;
     }

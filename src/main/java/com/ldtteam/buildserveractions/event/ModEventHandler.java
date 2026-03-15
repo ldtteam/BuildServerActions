@@ -1,5 +1,6 @@
-package com.ldtteam.buildserveractions;
+package com.ldtteam.buildserveractions.event;
 
+import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.registry.ModWidgetGroups;
 import com.ldtteam.buildserveractions.registry.ModWidgets;
@@ -11,9 +12,9 @@ import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Event handler class for the mod code.
+ * Event handler class for the mod events.
  */
-public class EventHandler
+public class ModEventHandler
 {
     /**
      * Event handler for the payload registers.
@@ -38,5 +39,4 @@ public class EventHandler
         WidgetManager.getInstance().setWidgetRegistry(event.create(new RegistryBuilder<>(ModWidgets.REGISTRY_KEY).sync(true)));
         WidgetManager.getInstance().setWidgetGroupRegistry(event.create(new RegistryBuilder<>(ModWidgetGroups.REGISTRY_KEY).sync(true)));
     }
-
 }

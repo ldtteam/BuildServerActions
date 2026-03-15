@@ -21,6 +21,6 @@ public class Constants
      */
     public static ResourceLocation modId(final String path)
     {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return new ResourceLocation(MOD_ID, path);
     }
 }

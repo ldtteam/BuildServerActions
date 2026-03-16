@@ -1,6 +1,7 @@
-package com.ldtteam.buildserveractions.client;
+package com.ldtteam.buildserveractions.event;
 
 import com.ldtteam.blockui.AtlasManager;
+import com.ldtteam.buildserveractions.client.ActionsListGuiEventHandler;
 import com.ldtteam.buildserveractions.constants.Constants;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -10,7 +11,7 @@ import net.neoforged.neoforge.common.NeoForge;
 /**
  * Client-side event handler for the mod.
  */
-public class ClientEventHandler
+public class ClientModEventHandler
 {
     /**
      * Register client-side event handlers.
@@ -20,7 +21,7 @@ public class ClientEventHandler
     public static void register(final IEventBus modBus)
     {
         NeoForge.EVENT_BUS.register(ActionsListGuiEventHandler.class);
-        modBus.register(ClientEventHandler.class);
+        modBus.register(ClientModEventHandler.class);
     }
 
     /**

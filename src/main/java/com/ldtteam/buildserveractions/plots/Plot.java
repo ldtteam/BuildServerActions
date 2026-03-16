@@ -10,13 +10,14 @@ import org.jetbrains.annotations.NotNull;
 
 public final class Plot
 {
-    private static final String NBT_PLOT_ID             = "id";
-    private static final String NBT_PLOT_NAME           = "name";
-    private static final String NBT_PLOT_ANCHOR_POINT   = "anchorPoint";
-    private static final String NBT_PLOT_SIZE           = "size";
-    private static final String NBT_PLOT_EDGE_BLOCK     = "edgeBlock";
-    private static final String NBT_PLOT_SETTINGS       = "settings";
-    private static final String NBT_PLOT_BUILDING_COUNT = "buildingCount";
+    private static final String NBT_PLOT_ID               = "id";
+    private static final String NBT_PLOT_NAME             = "name";
+    private static final String NBT_PLOT_ANCHOR_POINT     = "anchorPoint";
+    private static final String NBT_PLOT_SIZE             = "size";
+    private static final String NBT_PLOT_EDGE_BLOCK       = "edgeBlock";
+    private static final String NBT_PLOT_SETTINGS         = "settings";
+    private static final String NBT_PLOT_BUILDING_COUNT   = "buildingCount";
+    private static final String NBT_PLOT_DECORATIONS_COUNT = "decorationsCount";
 
     private final int          id;
     private final String       name;
@@ -26,6 +27,7 @@ public final class Plot
     private final PlotSettings settings;
 
     private int buildingCount;
+    private int decorationsCount;
 
     public Plot(final int id, final String name, final BlockPos anchorPoint, final PlotSize size, final BlockState edgeBlock, final PlotSettings settings)
     {
@@ -72,6 +74,11 @@ public final class Plot
         return buildingCount++;
     }
 
+    public int addDecoration()
+    {
+        return decorationsCount++;
+    }
+
     public CompoundTag serializeNBT()
     {
         final CompoundTag compound = new CompoundTag();
@@ -82,6 +89,7 @@ public final class Plot
         compound.put(NBT_PLOT_EDGE_BLOCK, NbtUtils.writeBlockState(edgeBlock));
         compound.put(NBT_PLOT_SETTINGS, settings.serializeNBT());
         compound.putInt(NBT_PLOT_BUILDING_COUNT, buildingCount);
+        compound.putInt(NBT_PLOT_DECORATIONS_COUNT, decorationsCount);
         return compound;
     }
 
@@ -95,6 +103,7 @@ public final class Plot
         final PlotSettings settings = PlotSettings.deserializeNBT(provider, compound.getCompound(NBT_PLOT_SETTINGS));
         final Plot plot = new Plot(id, name, anchorPoint, size, edgeBlock, settings);
         plot.buildingCount = compound.getInt(NBT_PLOT_BUILDING_COUNT);
+        plot.decorationsCount = compound.getInt(NBT_PLOT_DECORATIONS_COUNT);
         return plot;
     }
 }

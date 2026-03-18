@@ -14,14 +14,14 @@ import java.util.function.BiFunction;
  * A virtual {@link ContainerLevelAccess} implementation for opening menus without a physical block.
  * <p>
  * The key insight is how vanilla's stillValid() works:
- * <pre>
+ * <pre>{@code
  * protected static boolean stillValid(ContainerLevelAccess access, Player player, Block targetBlock) {
  *     return access.evaluate(
  *         (level, pos) -> level.getBlockState(pos).is(targetBlock) && player.canInteractWithBlock(pos, 4.0),
  *         true  // <-- DEFAULT VALUE when evaluate() returns Optional.empty()
  *     );
  * }
- * </pre>
+ * }</pre>
  * <p>
  * This implementation:
  * <ul>
@@ -40,7 +40,7 @@ import java.util.function.BiFunction;
  */
 public class VirtualContainerLevelAccess implements ContainerLevelAccess
 {
-    private final Level level;
+    private final Level    level;
     private final BlockPos pos;
 
     /**

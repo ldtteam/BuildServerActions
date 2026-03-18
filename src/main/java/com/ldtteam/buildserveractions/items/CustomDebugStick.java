@@ -25,6 +25,9 @@ import java.util.Collection;
  */
 public class CustomDebugStick extends DebugStickItem
 {
+    /**
+     * Creates a new custom debug stick with default properties.
+     */
     public CustomDebugStick()
     {
         super(new Item.Properties());

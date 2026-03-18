@@ -11,8 +11,18 @@ import static com.ldtteam.buildserveractions.util.WidgetLogger.broadcastMessage;
 /**
  * Callbacks for the set time widget defined by the mod.
  */
-public class SetTimeWidgetCallbacks
+public final class SetTimeWidgetCallbacks
 {
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private SetTimeWidgetCallbacks()
+    {
+    }
+
+    /**
+     * Metadata key for the time of day value.
+     */
     public static final String TIME_KEY = "timeOfDay";
 
     /**

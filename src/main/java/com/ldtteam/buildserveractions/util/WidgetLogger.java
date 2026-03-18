@@ -10,8 +10,15 @@ import net.minecraft.world.level.GameRules;
 /**
  * Log handlers for widget callbacks.
  */
-public class WidgetLogger
+public final class WidgetLogger
 {
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private WidgetLogger()
+    {
+    }
+
     /**
      * Broadcast a command message to the player, and to the admins.
      *

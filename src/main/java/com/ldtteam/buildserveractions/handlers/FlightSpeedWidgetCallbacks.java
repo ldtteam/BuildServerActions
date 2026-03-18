@@ -10,8 +10,15 @@ import static com.ldtteam.buildserveractions.util.WidgetLogger.broadcastMessage;
 /**
  * Callbacks for the flight speed widget defined by the mod.
  */
-public class FlightSpeedWidgetCallbacks
+public final class FlightSpeedWidgetCallbacks
 {
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private FlightSpeedWidgetCallbacks()
+    {
+    }
+
     /**
      * Widget metadata keys.
      */

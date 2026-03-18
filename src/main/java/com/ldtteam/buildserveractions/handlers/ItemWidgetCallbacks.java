@@ -13,8 +13,15 @@ import static com.ldtteam.buildserveractions.util.WidgetLogger.broadcastMessage;
 /**
  * Callbacks for the item widget defined by the mod.
  */
-public class ItemWidgetCallbacks
+public final class ItemWidgetCallbacks
 {
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private ItemWidgetCallbacks()
+    {
+    }
+
     /**
      * Get the name for the item.
      *

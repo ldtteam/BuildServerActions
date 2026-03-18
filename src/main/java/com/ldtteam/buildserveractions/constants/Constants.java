@@ -7,8 +7,14 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class Constants
 {
+    /**
+     * The mod identifier used for registration and resource locations.
+     */
     public static final String MOD_ID = "buildserveractions";
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private Constants()
     {
     }

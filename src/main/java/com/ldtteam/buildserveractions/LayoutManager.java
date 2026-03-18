@@ -29,6 +29,13 @@ public class LayoutManager
     private final Map<Class<? extends Screen>, WidgetLayout> layouts = new HashMap<>();
 
     /**
+     * Private constructor for singleton pattern.
+     */
+    private LayoutManager()
+    {
+    }
+
+    /**
      * Obtain the {@link LayoutManager} instance.
      *
      * @return the singleton instance.
@@ -100,6 +107,12 @@ public class LayoutManager
 
         /**
          * Default internal constructor.
+         *
+         * @param screenClass       the class type of which screen the widget layout gets attached to.
+         * @param maxGroups         the maximum amount of button columns visible at once.
+         * @param maxButtonsInGroup the maximum amount of buttons visible per column.
+         * @param alignment         the alignment of the window compared to the attached screen.
+         * @param offsetFunc        an additional offset compared to the position where the window is aligned.
          */
         public WidgetLayout(
           final Class<? extends AbstractContainerScreen<?>> screenClass,
@@ -117,6 +130,8 @@ public class LayoutManager
 
         /**
          * Get the class type of which screen the widget layout gets attached to.
+         *
+         * @return the screen class.
          */
         public Class<? extends AbstractContainerScreen<?>> getScreenClass()
         {

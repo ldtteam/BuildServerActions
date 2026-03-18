@@ -22,6 +22,13 @@ public class WidgetManager
     private static WidgetManager instance;
 
     /**
+     * Private constructor for singleton pattern.
+     */
+    private WidgetManager()
+    {
+    }
+
+    /**
      * The forge registry containing all the widget groups.
      */
     @Nullable

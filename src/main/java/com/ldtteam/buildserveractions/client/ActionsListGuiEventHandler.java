@@ -11,7 +11,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 
 /**
- * Handles all GUI events.
+ * Handles all GUI events for attaching and rendering the actions list window.
  */
 public class ActionsListGuiEventHandler
 {
@@ -22,10 +22,18 @@ public class ActionsListGuiEventHandler
      */
     private static final int ATTACHED_SCREEN_Z_OFFSET = 400;
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private ActionsListGuiEventHandler()
     {
     }
 
+    /**
+     * Called when a screen is opened; attaches the actions list window if applicable.
+     *
+     * @param event the screen init event.
+     */
     @SubscribeEvent
     public static void onScreenOpened(final ScreenEvent.Init.Post event)
     {
@@ -44,6 +52,11 @@ public class ActionsListGuiEventHandler
         event.addListener(currentGui.getScreen());
     }
 
+    /**
+     * Called during screen rendering; manually renders the attached BlockUI screen.
+     *
+     * @param event the screen render event.
+     */
     @SubscribeEvent
     public static void onScreenRender(final ScreenEvent.Render.Pre event)
     {
@@ -64,6 +77,11 @@ public class ActionsListGuiEventHandler
         }
     }
 
+    /**
+     * Called on client tick; ticks the attached BlockUI screen.
+     *
+     * @param event the client tick event.
+     */
     @SubscribeEvent
     public static void onClientTick(final ClientTickEvent.Post event)
     {
@@ -80,6 +98,11 @@ public class ActionsListGuiEventHandler
         }
     }
 
+    /**
+     * Called on mouse scroll; forwards scroll events to the attached BlockUI screen.
+     *
+     * @param event the mouse scroll event.
+     */
     @SubscribeEvent
     public static void onMouseScroll(final ScreenEvent.MouseScrolled.Pre event)
     {

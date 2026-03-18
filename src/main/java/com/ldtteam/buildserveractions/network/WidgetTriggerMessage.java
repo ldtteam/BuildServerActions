@@ -15,15 +15,29 @@ import static com.ldtteam.buildserveractions.constants.Constants.modId;
 
 /**
  * Message for triggering a widget.
+ *
+ * @param clickedWidget the widget that was clicked.
  */
 public record WidgetTriggerMessage(Widget clickedWidget) implements CustomPacketPayload
 {
+    /**
+     * The packet type identifier.
+     */
     public static final Type<WidgetTriggerMessage> TYPE = new Type<>(modId("widget_trigger"));
 
+    /**
+     * The stream codec for serialization.
+     */
     public static final StreamCodec<RegistryFriendlyByteBuf, WidgetTriggerMessage> STREAM_CODEC =
         ByteBufCodecs.registry(ModWidgets.REGISTRY_KEY)
             .map(WidgetTriggerMessage::new, WidgetTriggerMessage::clickedWidget);
 
+    /**
+     * Handles the incoming widget trigger message on the server.
+     *
+     * @param msg     the message to handle.
+     * @param context the payload context.
+     */
     public static void handle(final WidgetTriggerMessage msg, final IPayloadContext context)
     {
         context.enqueueWork(() -> {

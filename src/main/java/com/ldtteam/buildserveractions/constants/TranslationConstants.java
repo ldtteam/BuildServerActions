@@ -33,6 +33,18 @@ public class TranslationConstants
     public static final String COMMAND_PLOT_SETTINGS_ROAD_BLOCK_GET          = "com.ldtteam.buildserveractions.commands.plot.settings.roadblock.get";
     public static final String COMMAND_PLOT_SETTINGS_ROAD_BLOCK_SET          = "com.ldtteam.buildserveractions.commands.plot.settings.roadblock.set";
 
+    public static final String COMMAND_PLOT_LIST_HEADER           = "com.ldtteam.buildserveractions.commands.plot.list.header";
+    public static final String COMMAND_PLOT_LIST_ENTRY            = "com.ldtteam.buildserveractions.commands.plot.list.entry";
+    public static final String COMMAND_PLOT_LIST_EMPTY            = "com.ldtteam.buildserveractions.commands.plot.list.empty";
+    public static final String COMMAND_PLOT_LIST_INVALID_PAGE     = "com.ldtteam.buildserveractions.commands.plot.list.invalid_page";
+    public static final String COMMAND_PLOT_LIST_CLICK_TO_TELEPORT = "com.ldtteam.buildserveractions.commands.plot.list.click_to_teleport";
+    public static final String COMMAND_PLOT_LIST_PREV             = "com.ldtteam.buildserveractions.commands.plot.list.prev";
+    public static final String COMMAND_PLOT_LIST_NEXT             = "com.ldtteam.buildserveractions.commands.plot.list.next";
+    public static final String COMMAND_PLOT_LIST_PAGE             = "com.ldtteam.buildserveractions.commands.plot.list.page";
+
+    public static final String COMMAND_PLOT_RENAME_SUCCESS   = "com.ldtteam.buildserveractions.commands.plot.rename.success";
+    public static final String COMMAND_PLOT_RENAME_NOT_FOUND = "com.ldtteam.buildserveractions.commands.plot.rename.not_found";
+
     private TranslationConstants()
     {
     }

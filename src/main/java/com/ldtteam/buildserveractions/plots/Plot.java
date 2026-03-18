@@ -8,27 +8,73 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a plot in the build server world.
+ * <p>
+ * A plot is a designated area with a specific size, anchor point, and settings.
+ * It contains areas for buildings and decorations that can be extended over time.
+ */
 public final class Plot
 {
-    private static final String NBT_PLOT_ID               = "id";
-    private static final String NBT_PLOT_NAME             = "name";
-    private static final String NBT_PLOT_ANCHOR_POINT     = "anchorPoint";
-    private static final String NBT_PLOT_SIZE             = "size";
-    private static final String NBT_PLOT_EDGE_BLOCK       = "edgeBlock";
-    private static final String NBT_PLOT_SETTINGS         = "settings";
-    private static final String NBT_PLOT_BUILDING_COUNT   = "buildingCount";
+    private static final String NBT_PLOT_ID                = "id";
+    private static final String NBT_PLOT_NAME              = "name";
+    private static final String NBT_PLOT_ANCHOR_POINT      = "anchorPoint";
+    private static final String NBT_PLOT_SIZE              = "size";
+    private static final String NBT_PLOT_EDGE_BLOCK        = "edgeBlock";
+    private static final String NBT_PLOT_SETTINGS          = "settings";
+    private static final String NBT_PLOT_BUILDING_COUNT    = "buildingCount";
     private static final String NBT_PLOT_DECORATIONS_COUNT = "decorationsCount";
 
-    private final int          id;
-    private final String       name;
-    private final BlockPos     anchorPoint;
-    private final PlotSize     size;
-    private final BlockState   edgeBlock;
+    /**
+     * The unique identifier for this plot.
+     */
+    private final int id;
+
+    /**
+     * The display name of this plot.
+     */
+    private String name;
+
+    /**
+     * The anchor point (origin) of this plot in world coordinates.
+     */
+    private final BlockPos anchorPoint;
+
+    /**
+     * The size category of this plot.
+     */
+    private final PlotSize size;
+
+    /**
+     * The block state used for the plot's edge/border.
+     */
+    private final BlockState edgeBlock;
+
+    /**
+     * The settings applied to this plot.
+     */
     private final PlotSettings settings;
 
+    /**
+     * The current number of building columns in this plot.
+     */
     private int buildingCount;
+
+    /**
+     * The current number of decoration columns in this plot.
+     */
     private int decorationsCount;
 
+    /**
+     * Creates a new plot with the specified parameters.
+     *
+     * @param id          the unique identifier for this plot.
+     * @param name        the display name of this plot.
+     * @param anchorPoint the anchor point (origin) of this plot in world coordinates.
+     * @param size        the size category of this plot.
+     * @param edgeBlock   the block state used for the plot's edge/border.
+     * @param settings    the settings applied to this plot.
+     */
     public Plot(final int id, final String name, final BlockPos anchorPoint, final PlotSize size, final BlockState edgeBlock, final PlotSettings settings)
     {
         this.id = id;
@@ -39,46 +85,101 @@ public final class Plot
         this.settings = settings;
     }
 
+    /**
+     * Gets the unique identifier of this plot.
+     *
+     * @return the plot ID.
+     */
     public int id()
     {
         return id;
     }
 
+    /**
+     * Gets the display name of this plot.
+     *
+     * @return the plot name.
+     */
     public String name()
     {
         return name;
     }
 
+    /**
+     * Sets the display name of this plot.
+     *
+     * @param name the new name for this plot.
+     */
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    /**
+     * Gets the anchor point (origin) of this plot.
+     *
+     * @return the anchor point as a BlockPos.
+     */
     public BlockPos anchorPoint()
     {
         return anchorPoint;
     }
 
+    /**
+     * Gets the size category of this plot.
+     *
+     * @return the plot size.
+     */
     public PlotSize size()
     {
         return size;
     }
 
+    /**
+     * Gets the block state used for the plot's edge/border.
+     *
+     * @return the edge block state.
+     */
     public BlockState edgeBlock()
     {
         return edgeBlock;
     }
 
+    /**
+     * Gets the settings applied to this plot.
+     *
+     * @return the plot settings.
+     */
     public PlotSettings settings()
     {
         return settings;
     }
 
+    /**
+     * Adds a new building column to this plot and returns its index.
+     *
+     * @return the index of the newly added building column.
+     */
     public int addBuilding()
     {
         return buildingCount++;
     }
 
+    /**
+     * Adds a new decoration column to this plot and returns its index.
+     *
+     * @return the index of the newly added decoration column.
+     */
     public int addDecoration()
     {
         return decorationsCount++;
     }
 
+    /**
+     * Serializes this plot to NBT format for persistence.
+     *
+     * @return a CompoundTag containing all plot data.
+     */
     public CompoundTag serializeNBT()
     {
         final CompoundTag compound = new CompoundTag();
@@ -93,6 +194,13 @@ public final class Plot
         return compound;
     }
 
+    /**
+     * Deserializes a plot from NBT format.
+     *
+     * @param provider the holder lookup provider for block state deserialization.
+     * @param compound the CompoundTag containing the plot data.
+     * @return a new Plot instance with the deserialized data.
+     */
     public static Plot deserializeNBT(final @NotNull HolderLookup.Provider provider, final @NotNull CompoundTag compound)
     {
         final int id = compound.getInt(NBT_PLOT_ID);

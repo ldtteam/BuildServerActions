@@ -121,3 +121,13 @@ runs {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
 }
+
+tasks.withType(Javadoc).configureEach {
+    options.addStringOption('Xwerror', '-quiet')
+    exclude '**/registry/**'
+    exclude '**/constants/TranslationConstants.java'
+}
+
+tasks.named("assemble") {
+    dependsOn tasks.withType(Javadoc)
+}

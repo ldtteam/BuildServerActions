@@ -22,5 +22,15 @@
   "com.ldtteam.buildserveractions.commands.plot.settings.ylevel.get": "Current value for Y-level: %s",
   "com.ldtteam.buildserveractions.commands.plot.settings.ylevel.set": "Set new value for Y-level: %s",
   "com.ldtteam.buildserveractions.commands.plot.settings.roadblock.get": "Current value for road block: %s",
-  "com.ldtteam.buildserveractions.commands.plot.settings.roadblock.set": "Set new value for road block: %s"
+  "com.ldtteam.buildserveractions.commands.plot.settings.roadblock.set": "Set new value for road block: %s",
+  "com.ldtteam.buildserveractions.commands.plot.list.header": "--- Plots (Page %s/%s, Total: %s) ---",
+  "com.ldtteam.buildserveractions.commands.plot.list.entry": "#%s: %s",
+  "com.ldtteam.buildserveractions.commands.plot.list.empty": "No plots found.",
+  "com.ldtteam.buildserveractions.commands.plot.list.invalid_page": "Invalid page %s. There are only %s pages.",
+  "com.ldtteam.buildserveractions.commands.plot.list.click_to_teleport": "Click to teleport",
+  "com.ldtteam.buildserveractions.commands.plot.list.prev": "Previous",
+  "com.ldtteam.buildserveractions.commands.plot.list.next": "Next",
+  "com.ldtteam.buildserveractions.commands.plot.list.page": "Go to page %s",
+  "com.ldtteam.buildserveractions.commands.plot.rename.success": "Renamed plot #%s to '%s'.",
+  "com.ldtteam.buildserveractions.commands.plot.rename.not_found": "Plot #%s not found in direction %s."
 }

@@ -14,8 +14,15 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Event handler class for the mod events.
  */
-public class ModEventHandler
+public final class ModEventHandler
 {
+    /**
+     * Private constructor to prevent instantiation of event handler class.
+     */
+    private ModEventHandler()
+    {
+    }
+
     /**
      * Event handler for the payload registers.
      *

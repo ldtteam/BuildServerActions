@@ -20,7 +20,10 @@ public class WidgetGroup
     private final Comparator<Widget> widgetSorter;
 
     /**
-     * Default internal constructor.
+     * Creates a new widget group with the specified ID and sorter.
+     *
+     * @param groupId      the unique identifier for this group.
+     * @param widgetSorter the comparator used to sort widgets within this group.
      */
     public WidgetGroup(final ResourceLocation groupId, final Comparator<Widget> widgetSorter)
     {

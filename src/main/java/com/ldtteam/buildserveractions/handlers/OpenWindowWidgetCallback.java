@@ -11,8 +11,15 @@ import static com.ldtteam.buildserveractions.constants.TranslationConstants.WIDG
 /**
  * Callbacks for the open window widget defined by the mod.
  */
-public class OpenWindowWidgetCallback
+public final class OpenWindowWidgetCallback
 {
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private OpenWindowWidgetCallback()
+    {
+    }
+
     /**
      * Widget metadata keys.
      */

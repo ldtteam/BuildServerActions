@@ -13,8 +13,15 @@ import static com.ldtteam.buildserveractions.util.WidgetLogger.broadcastMessage;
 /**
  * Callbacks for the gamemode widget defined by the mod.
  */
-public class GameModeWidgetCallbacks
+public final class GameModeWidgetCallbacks
 {
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private GameModeWidgetCallbacks()
+    {
+    }
+
     /**
      * Widget metadata keys.
      */
@@ -61,6 +68,13 @@ public class GameModeWidgetCallbacks
      */
     public static class GameModeSorter implements Comparator<Widget>
     {
+        /**
+         * Creates a new game mode sorter instance.
+         */
+        public GameModeSorter()
+        {
+        }
+
         @Override
         public int compare(final Widget widget1, final Widget widget2)
         {

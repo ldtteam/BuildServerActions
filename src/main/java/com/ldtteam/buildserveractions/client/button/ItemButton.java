@@ -12,6 +12,13 @@ import net.minecraft.world.item.ItemStack;
 public class ItemButton extends ButtonImage
 {
     /**
+     * Creates a new item button instance.
+     */
+    public ItemButton()
+    {
+    }
+
+    /**
      * The item stack to render.
      */
     protected ItemStack itemStack;

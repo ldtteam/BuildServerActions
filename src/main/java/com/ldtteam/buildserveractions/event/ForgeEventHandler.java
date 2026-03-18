@@ -1,9 +1,6 @@
 package com.ldtteam.buildserveractions.event;
 
-import com.ldtteam.buildserveractions.command.CommandNewPlot;
-import com.ldtteam.buildserveractions.command.CommandPlotExtend;
-import com.ldtteam.buildserveractions.command.CommandPlotList;
-import com.ldtteam.buildserveractions.command.CommandPlotSettings;
+import com.ldtteam.buildserveractions.command.*;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
@@ -12,6 +9,13 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
  */
 public class ForgeEventHandler
 {
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private ForgeEventHandler()
+    {
+    }
+
     /**
      * Event handler for command registration.
      *
@@ -23,6 +27,7 @@ public class ForgeEventHandler
         event.getDispatcher().register(new CommandPlotList().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandNewPlot().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotExtend().build(event.getBuildContext()));
+        event.getDispatcher().register(new CommandPlotRename().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotSettings().build(event.getBuildContext()));
     }
 }

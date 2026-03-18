@@ -136,8 +136,9 @@ public class Widget
      * Get a value from the metadata of this widget.
      * Will attempt to cast the value to the correct type argument.
      *
-     * @param key  the key of the metadata.
+     * @param key  the string key used to store the value.
      * @param type the expected type of the value.
+     * @param <T>  the type of the value to retrieve.
      * @return the object or null if not exists.
      * @throws ClassCastException when the value of the key does not match the given type.
      */

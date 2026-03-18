@@ -14,6 +14,13 @@ import net.neoforged.neoforge.common.NeoForge;
 public class ClientModEventHandler
 {
     /**
+     * Private constructor to prevent instantiation.
+     */
+    private ClientModEventHandler()
+    {
+    }
+
+    /**
      * Register client-side event handlers.
      *
      * @param modBus the mod event bus.

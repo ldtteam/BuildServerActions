@@ -14,7 +14,18 @@ import net.minecraft.world.item.Items;
  */
 public final class ClockItemButton extends ItemButton
 {
+    /**
+     * Stores the original time property function to restore after rendering.
+     */
     private ItemPropertyFunction initialFunction = null;
+
+    /**
+     * Default constructor.
+     */
+    public ClockItemButton()
+    {
+        super();
+    }
 
     @Override
     protected void preRender(final BOGuiGraphics ms, final double mx, final double my)

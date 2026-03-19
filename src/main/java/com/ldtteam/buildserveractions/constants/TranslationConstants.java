@@ -45,6 +45,44 @@ public class TranslationConstants
     public static final String COMMAND_PLOT_RENAME_SUCCESS   = "com.ldtteam.buildserveractions.commands.plot.rename.success";
     public static final String COMMAND_PLOT_RENAME_NOT_FOUND = "com.ldtteam.buildserveractions.commands.plot.rename.not_found";
 
+    public static final String COMMAND_PLOT_TELEPORT_SUCCESS   = "com.ldtteam.buildserveractions.commands.plot.teleport.success";
+    public static final String COMMAND_PLOT_TELEPORT_NOT_FOUND = "com.ldtteam.buildserveractions.commands.plot.teleport.not_found";
+    public static final String COMMAND_PLOT_TELEPORT_NO_ENTITY = "com.ldtteam.buildserveractions.commands.plot.teleport.no_entity";
+
+    // Setup command translations
+    public static final String COMMAND_PLOT_SETUP_ALREADY_COMPLETE   = "com.ldtteam.buildserveractions.commands.plot.setup.already_complete";
+    public static final String COMMAND_PLOT_SETUP_NO_PERMISSION      = "com.ldtteam.buildserveractions.commands.plot.setup.no_permission";
+    public static final String COMMAND_PLOT_SETUP_STARTED            = "com.ldtteam.buildserveractions.commands.plot.setup.started";
+    public static final String COMMAND_PLOT_SETUP_CANCELLED          = "com.ldtteam.buildserveractions.commands.plot.setup.cancelled";
+    public static final String COMMAND_PLOT_SETUP_COMPLETE           = "com.ldtteam.buildserveractions.commands.plot.setup.complete";
+    public static final String COMMAND_PLOT_SETUP_WRONG_STEP         = "com.ldtteam.buildserveractions.commands.plot.setup.wrong_step";
+    public static final String COMMAND_PLOT_SETUP_NO_SESSION         = "com.ldtteam.buildserveractions.commands.plot.setup.no_session";
+    public static final String COMMAND_PLOT_SETUP_STEP_HEADER        = "com.ldtteam.buildserveractions.commands.plot.setup.step_header";
+    public static final String COMMAND_PLOT_SETUP_SET_VALUE          = "com.ldtteam.buildserveractions.commands.plot.setup.set_value";
+    public static final String COMMAND_PLOT_SETUP_USE_DEFAULT        = "com.ldtteam.buildserveractions.commands.plot.setup.use_default";
+    public static final String COMMAND_PLOT_SETUP_KEEP_CURRENT       = "com.ldtteam.buildserveractions.commands.plot.setup.keep_current";
+    public static final String COMMAND_PLOT_SETUP_DEFAULT_VALUE      = "com.ldtteam.buildserveractions.commands.plot.setup.default_value";
+    public static final String COMMAND_PLOT_SETUP_CURRENT_VALUE      = "com.ldtteam.buildserveractions.commands.plot.setup.current_value";
+    public static final String COMMAND_PLOT_SETUP_VALUE_SET          = "com.ldtteam.buildserveractions.commands.plot.setup.value_set";
+    public static final String COMMAND_PLOT_SETUP_CONFIRM_PROMPT     = "com.ldtteam.buildserveractions.commands.plot.setup.confirm_prompt";
+    public static final String COMMAND_PLOT_SETUP_CONFIRM_BUTTON     = "com.ldtteam.buildserveractions.commands.plot.setup.confirm_button";
+    public static final String COMMAND_PLOT_SETUP_CANCEL_BUTTON      = "com.ldtteam.buildserveractions.commands.plot.setup.cancel_button";
+    public static final String COMMAND_PLOT_SETUP_RESTART_BUTTON     = "com.ldtteam.buildserveractions.commands.plot.setup.restart_button";
+    public static final String COMMAND_PLOT_SETUP_RESTARTED          = "com.ldtteam.buildserveractions.commands.plot.setup.restarted";
+    public static final String COMMAND_PLOT_SETUP_EXECUTING_PENDING  = "com.ldtteam.buildserveractions.commands.plot.setup.executing_pending";
+
+    // Setup step descriptions
+    public static final String COMMAND_PLOT_SETUP_DESC_CENTER_ROAD   = "com.ldtteam.buildserveractions.commands.plot.setup.desc.center_road";
+    public static final String COMMAND_PLOT_SETUP_DESC_PLOT_ROAD     = "com.ldtteam.buildserveractions.commands.plot.setup.desc.plot_road";
+    public static final String COMMAND_PLOT_SETUP_DESC_NORTH_OFFSET  = "com.ldtteam.buildserveractions.commands.plot.setup.desc.north_offset";
+    public static final String COMMAND_PLOT_SETUP_DESC_SOUTH_OFFSET  = "com.ldtteam.buildserveractions.commands.plot.setup.desc.south_offset";
+    public static final String COMMAND_PLOT_SETUP_DESC_ROAD_BLOCK    = "com.ldtteam.buildserveractions.commands.plot.setup.desc.road_block";
+    public static final String COMMAND_PLOT_SETUP_DESC_Y_LEVEL       = "com.ldtteam.buildserveractions.commands.plot.setup.desc.y_level";
+
+    // New plot command - setup required
+    public static final String COMMAND_PLOT_NEW_SETUP_REQUIRED       = "com.ldtteam.buildserveractions.commands.plot.new.setup_required";
+    public static final String COMMAND_PLOT_NEW_SETUP_NOT_COMPLETE   = "com.ldtteam.buildserveractions.commands.plot.new.setup_not_complete";
+
     private TranslationConstants()
     {
     }

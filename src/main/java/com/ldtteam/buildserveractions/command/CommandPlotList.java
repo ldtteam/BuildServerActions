@@ -113,7 +113,7 @@ public class CommandPlotList implements ICommand
             final MutableComponent coordsComponent = Component.literal("[" + anchor.getX() + ", " + anchor.getY() + ", " + anchor.getZ() + "]")
                 .withStyle(style -> style
                     .withColor(ChatFormatting.AQUA)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + anchor.getX() + " " + anchor.above().getY() + " " + anchor.getZ()))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/plots teleport " + directionName + " " + plot.id()))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable(COMMAND_PLOT_LIST_CLICK_TO_TELEPORT))));
 
             final MutableComponent entry = Component.translatable(COMMAND_PLOT_LIST_ENTRY, plot.id(), plot.name())

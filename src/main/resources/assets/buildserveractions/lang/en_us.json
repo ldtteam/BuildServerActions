@@ -32,5 +32,40 @@
   "com.ldtteam.buildserveractions.commands.plot.list.next": "Next",
   "com.ldtteam.buildserveractions.commands.plot.list.page": "Go to page %s",
   "com.ldtteam.buildserveractions.commands.plot.rename.success": "Renamed plot #%s to '%s'.",
-  "com.ldtteam.buildserveractions.commands.plot.rename.not_found": "Plot #%s not found in direction %s."
+  "com.ldtteam.buildserveractions.commands.plot.rename.not_found": "Plot #%s not found in direction %s.",
+
+  "com.ldtteam.buildserveractions.commands.plot.teleport.success": "Teleported to plot %s",
+  "com.ldtteam.buildserveractions.commands.plot.teleport.not_found": "Plot #%s not found in direction %s.",
+  "com.ldtteam.buildserveractions.commands.plot.teleport.no_entity": "This command must be executed by an entity",
+
+  "com.ldtteam.buildserveractions.commands.plot.setup.already_complete": "Setup has already been completed. Settings are locked.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.no_permission": "You do not have permission to run plot setup.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.started": "Starting plot setup wizard...",
+  "com.ldtteam.buildserveractions.commands.plot.setup.cancelled": "Setup cancelled.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.complete": "Setup complete! You can now create plots.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.wrong_step": "Please complete the current step first.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.no_session": "No active setup session. Run /plots setup to start.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.step_header": "=== Step %s/%s ===",
+  "com.ldtteam.buildserveractions.commands.plot.setup.set_value": "Set Value",
+  "com.ldtteam.buildserveractions.commands.plot.setup.use_default": "Use Default (%s)",
+  "com.ldtteam.buildserveractions.commands.plot.setup.keep_current": "Keep Current (%s)",
+  "com.ldtteam.buildserveractions.commands.plot.setup.default_value": "Default: %s",
+  "com.ldtteam.buildserveractions.commands.plot.setup.current_value": "Current: %s",
+  "com.ldtteam.buildserveractions.commands.plot.setup.value_set": "Value set: %s",
+  "com.ldtteam.buildserveractions.commands.plot.setup.confirm_prompt": "Review your settings:",
+  "com.ldtteam.buildserveractions.commands.plot.setup.confirm_button": "Confirm",
+  "com.ldtteam.buildserveractions.commands.plot.setup.cancel_button": "Cancel",
+  "com.ldtteam.buildserveractions.commands.plot.setup.restart_button": "Edit",
+  "com.ldtteam.buildserveractions.commands.plot.setup.restarted": "Restarting setup with your current values...",
+  "com.ldtteam.buildserveractions.commands.plot.setup.executing_pending": "Executing your original command...",
+
+  "com.ldtteam.buildserveractions.commands.plot.setup.desc.center_road": "The center road runs vertically between the building area (east) and decorations area (west). This value sets its width in blocks. A wider road provides more visual separation.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.desc.plot_road": "These are the horizontal roads that separate each row of plots within a column. They run east-west between individual building plots. A value of 3 gives enough space for pathways.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.desc.north_offset": "How many blocks north of the world origin (0, 0) should the official plot area begin. This creates a buffer zone at spawn. Official plots extend northward from this point.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.desc.south_offset": "How many blocks south of the world origin (0, 0) should the unofficial plot area begin. This creates a buffer zone at spawn. Unofficial plots extend southward from this point.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.desc.road_block": "The block type used to fill all road surfaces (center road and plot roads). Choose a block that fits your server's aesthetic.",
+  "com.ldtteam.buildserveractions.commands.plot.setup.desc.y_level": "The vertical height (Y coordinate) where plot platforms are generated. For a default superflat world, use -61 (one block above bedrock at -64). Adjust based on your world's terrain.",
+
+  "com.ldtteam.buildserveractions.commands.plot.new.setup_required": "Plot setup is required before creating plots. Complete the setup below.",
+  "com.ldtteam.buildserveractions.commands.plot.new.setup_not_complete": "Plot setup has not been completed yet. Please ask an administrator to run /plots setup first."
 }

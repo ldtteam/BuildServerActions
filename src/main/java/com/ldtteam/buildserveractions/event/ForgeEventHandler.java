@@ -24,10 +24,11 @@ public class ForgeEventHandler
     @SubscribeEvent
     public static void onCommandsRegister(final RegisterCommandsEvent event)
     {
-        event.getDispatcher().register(new CommandPlotList().build(event.getBuildContext()));
-        event.getDispatcher().register(new CommandNewPlot().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotExtend().build(event.getBuildContext()));
+        event.getDispatcher().register(new CommandPlotList().build(event.getBuildContext()));
+        event.getDispatcher().register(new CommandPlotNew().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotRename().build(event.getBuildContext()));
-        event.getDispatcher().register(new CommandPlotSettings().build(event.getBuildContext()));
+        event.getDispatcher().register(new CommandPlotSetup().build(event.getBuildContext()));
+        event.getDispatcher().register(new CommandPlotTeleport().build(event.getBuildContext()));
     }
 }

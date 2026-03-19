@@ -1,6 +1,7 @@
 package com.ldtteam.buildserveractions.command;
 
 import com.ldtteam.buildserveractions.plots.PlotDirection;
+import com.ldtteam.buildserveractions.plots.PlotManager;
 import com.ldtteam.buildserveractions.plots.PlotSize;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,12 +12,14 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import static com.ldtteam.buildserveractions.constants.TranslationConstants.COMMAND_PLOT_NEW_CREATED;
 import static com.ldtteam.buildserveractions.constants.TranslationConstants.COMMAND_PLOT_NEW_NO_OFFICIAL;
+import static com.ldtteam.buildserveractions.constants.TranslationConstants.COMMAND_PLOT_NEW_SETUP_NOT_COMPLETE;
 import static com.ldtteam.buildserveractions.registry.ModDataAttachmentTypes.PLOT_MANAGER;
 
 /**
@@ -27,12 +30,12 @@ import static com.ldtteam.buildserveractions.registry.ModDataAttachmentTypes.PLO
  * Creates a new plot with the specified parameters. Official plots require
  * gamemaster permissions. If no edge block is specified, white concrete is used.
  */
-public class CommandNewPlot implements ICommand
+public class CommandPlotNew implements ICommand
 {
     /**
      * Creates a new instance of the plot creation command.
      */
-    public CommandNewPlot()
+    public CommandPlotNew()
     {
     }
 
@@ -114,9 +117,52 @@ public class CommandNewPlot implements ICommand
             return 0;
         }
 
-        final int newPlotId = context.getSource().getLevel().getData(PLOT_MANAGER).createPlot(context.getSource().getLevel(), name, size, direction, edgeBlock);
+        final PlotManager plotManager = context.getSource().getLevel().getData(PLOT_MANAGER);
+
+        // Check if setup is complete
+        if (!plotManager.isSetupComplete())
+        {
+            // Only gamemasters can run setup, others should be told to wait
+            if (!context.getSource().hasPermission(Commands.LEVEL_GAMEMASTERS))
+            {
+                context.getSource().sendFailure(Component.translatable(COMMAND_PLOT_NEW_SETUP_NOT_COMPLETE));
+                return 0;
+            }
+
+            final String pendingCommand = reconstructCommand(name, size, direction, edgeBlock);
+            CommandPlotSetup.startWithPendingCommand(context.getSource(), pendingCommand);
+            return 1;
+        }
+
+        final Integer newPlotId = plotManager.createPlot(context.getSource().getLevel(), name, size, direction, edgeBlock);
         context.getSource().sendSuccess(() -> Component.translatable(COMMAND_PLOT_NEW_CREATED, name, newPlotId), false);
 
         return 1;
+    }
+
+    /**
+     * Reconstructs the command string from the arguments for deferred execution.
+     *
+     * @param name      the plot name.
+     * @param size      the plot size.
+     * @param direction the plot direction.
+     * @param edgeBlock the edge block state.
+     * @return the reconstructed command string.
+     */
+    private String reconstructCommand(final String name, final PlotSize size, final PlotDirection direction, final BlockState edgeBlock)
+    {
+        final StringBuilder command = new StringBuilder();
+        command.append("/plots new ");
+        command.append("\"").append(name).append("\" ");
+        command.append(size.getSerializedName()).append(" ");
+        command.append(direction.getSerializedName());
+
+        // Add edge block if not the default
+        if (!edgeBlock.equals(Blocks.WHITE_CONCRETE.defaultBlockState()))
+        {
+            command.append(" ").append(BuiltInRegistries.BLOCK.getKey(edgeBlock.getBlock()));
+        }
+
+        return command.toString();
     }
 }

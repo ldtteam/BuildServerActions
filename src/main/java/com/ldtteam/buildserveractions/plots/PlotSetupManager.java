@@ -132,12 +132,33 @@ public final class PlotSetupManager
      */
     public enum SetupStep
     {
+        /**
+         * Step for configuring the center road spacing between plot rows.
+         */
         CENTER_ROAD_SPACING("center-road", DEFAULT_CENTER_ROAD_SPACING),
+        /**
+         * Step for configuring the road spacing between individual plots.
+         */
         PLOT_ROAD_SPACING("plot-road", DEFAULT_PLOT_ROAD_SPACING),
+        /**
+         * Step for configuring the north (official) direction offset.
+         */
         NORTH_OFFSET("north-offset", DEFAULT_NORTH_OFFSET),
+        /**
+         * Step for configuring the south (unofficial) direction offset.
+         */
         SOUTH_OFFSET("south-offset", DEFAULT_SOUTH_OFFSET),
+        /**
+         * Step for configuring the road block type.
+         */
         ROAD_BLOCK("road-block", DEFAULT_ROAD_BLOCK),
+        /**
+         * Step for configuring the Y level for plots.
+         */
         Y_LEVEL("y-level", DEFAULT_Y_LEVEL),
+        /**
+         * Final confirmation step to apply all settings.
+         */
         CONFIRM("confirm", null);
 
         private final String commandName;
@@ -152,7 +173,7 @@ public final class PlotSetupManager
         /**
          * Gets the command name for this step.
          *
-         * @return the command name used in /plots setup <name>.
+         * @return the command name used in /plots setup.
          */
         public String getCommandName()
         {
@@ -279,63 +300,121 @@ public final class PlotSetupManager
             return pendingCommand;
         }
 
-        // Getters and setters for configuration values
-
+        /**
+         * Gets the center road spacing value.
+         *
+         * @return the center road spacing.
+         */
         public int getCenterRoadSpacing()
         {
             return centerRoadSpacing;
         }
 
+        /**
+         * Sets the center road spacing value.
+         *
+         * @param centerRoadSpacing the center road spacing to set.
+         */
         public void setCenterRoadSpacing(final int centerRoadSpacing)
         {
             this.centerRoadSpacing = centerRoadSpacing;
         }
 
+        /**
+         * Gets the plot road spacing value.
+         *
+         * @return the plot road spacing.
+         */
         public int getPlotRoadSpacing()
         {
             return plotRoadSpacing;
         }
 
+        /**
+         * Sets the plot road spacing value.
+         *
+         * @param plotRoadSpacing the plot road spacing to set.
+         */
         public void setPlotRoadSpacing(final int plotRoadSpacing)
         {
             this.plotRoadSpacing = plotRoadSpacing;
         }
 
+        /**
+         * Gets the north offset value.
+         *
+         * @return the north offset.
+         */
         public int getNorthOffset()
         {
             return northOffset;
         }
 
+        /**
+         * Sets the north offset value.
+         *
+         * @param northOffset the north offset to set.
+         */
         public void setNorthOffset(final int northOffset)
         {
             this.northOffset = northOffset;
         }
 
+        /**
+         * Gets the south offset value.
+         *
+         * @return the south offset.
+         */
         public int getSouthOffset()
         {
             return southOffset;
         }
 
+        /**
+         * Sets the south offset value.
+         *
+         * @param southOffset the south offset to set.
+         */
         public void setSouthOffset(final int southOffset)
         {
             this.southOffset = southOffset;
         }
 
+        /**
+         * Gets the road block state.
+         *
+         * @return the road block state.
+         */
         public BlockState getRoadBlock()
         {
             return roadBlock;
         }
 
+        /**
+         * Sets the road block state.
+         *
+         * @param roadBlock the road block state to set.
+         */
         public void setRoadBlock(final BlockState roadBlock)
         {
             this.roadBlock = roadBlock;
         }
 
+        /**
+         * Gets the Y level value.
+         *
+         * @return the Y level.
+         */
         public int getYLevel()
         {
             return yLevel;
         }
 
+        /**
+         * Sets the Y level value.
+         *
+         * @param yLevel the Y level to set.
+         */
         public void setYLevel(final int yLevel)
         {
             this.yLevel = yLevel;

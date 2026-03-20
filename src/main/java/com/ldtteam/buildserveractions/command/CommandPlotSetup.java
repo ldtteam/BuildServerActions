@@ -117,6 +117,7 @@ public class CommandPlotSetup implements ICommand
      *
      * @param context        the command source stack.
      * @param pendingCommand the command to execute after setup.
+     * @throws CommandSyntaxException if the command source is not a player.
      */
     public static void startWithPendingCommand(final CommandSourceStack context, final String pendingCommand) throws CommandSyntaxException
     {

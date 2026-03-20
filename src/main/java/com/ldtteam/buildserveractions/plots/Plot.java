@@ -21,7 +21,6 @@ public final class Plot
     private static final String NBT_PLOT_ANCHOR_POINT      = "anchorPoint";
     private static final String NBT_PLOT_SIZE              = "size";
     private static final String NBT_PLOT_EDGE_BLOCK        = "edgeBlock";
-    private static final String NBT_PLOT_SETTINGS          = "settings";
     private static final String NBT_PLOT_BUILDING_COUNT    = "buildingCount";
     private static final String NBT_PLOT_DECORATIONS_COUNT = "decorationsCount";
 
@@ -51,11 +50,6 @@ public final class Plot
     private final BlockState edgeBlock;
 
     /**
-     * The settings applied to this plot.
-     */
-    private final PlotSettings settings;
-
-    /**
      * The current number of building columns in this plot.
      */
     private int buildingCount;
@@ -73,16 +67,14 @@ public final class Plot
      * @param anchorPoint the anchor point (origin) of this plot in world coordinates.
      * @param size        the size category of this plot.
      * @param edgeBlock   the block state used for the plot's edge/border.
-     * @param settings    the settings applied to this plot.
      */
-    public Plot(final int id, final String name, final BlockPos anchorPoint, final PlotSize size, final BlockState edgeBlock, final PlotSettings settings)
+    public Plot(final int id, final String name, final BlockPos anchorPoint, final PlotSize size, final BlockState edgeBlock)
     {
         this.id = id;
         this.name = name;
         this.anchorPoint = anchorPoint;
         this.size = size;
         this.edgeBlock = edgeBlock;
-        this.settings = settings;
     }
 
     /**
@@ -146,16 +138,6 @@ public final class Plot
     }
 
     /**
-     * Gets the settings applied to this plot.
-     *
-     * @return the plot settings.
-     */
-    public PlotSettings settings()
-    {
-        return settings;
-    }
-
-    /**
      * Adds a new building column to this plot and returns its index.
      *
      * @return the index of the newly added building column.
@@ -176,6 +158,26 @@ public final class Plot
     }
 
     /**
+     * Gets the current number of building columns in this plot.
+     *
+     * @return the building column count.
+     */
+    public int getBuildingCount()
+    {
+        return buildingCount;
+    }
+
+    /**
+     * Gets the current number of decoration columns in this plot.
+     *
+     * @return the decoration column count.
+     */
+    public int getDecorationsCount()
+    {
+        return decorationsCount;
+    }
+
+    /**
      * Serializes this plot to NBT format for persistence.
      *
      * @return a CompoundTag containing all plot data.
@@ -188,7 +190,6 @@ public final class Plot
         compound.put(NBT_PLOT_ANCHOR_POINT, NbtUtils.writeBlockPos(anchorPoint));
         compound.putString(NBT_PLOT_SIZE, size.name());
         compound.put(NBT_PLOT_EDGE_BLOCK, NbtUtils.writeBlockState(edgeBlock));
-        compound.put(NBT_PLOT_SETTINGS, settings.serializeNBT());
         compound.putInt(NBT_PLOT_BUILDING_COUNT, buildingCount);
         compound.putInt(NBT_PLOT_DECORATIONS_COUNT, decorationsCount);
         return compound;
@@ -208,8 +209,7 @@ public final class Plot
         final BlockPos anchorPoint = NbtUtils.readBlockPos(compound, NBT_PLOT_ANCHOR_POINT).orElseThrow();
         final PlotSize size = PlotSize.valueOf(compound.getString(NBT_PLOT_SIZE));
         final BlockState edgeBlock = NbtUtils.readBlockState(provider.lookupOrThrow(Registries.BLOCK), compound.getCompound(NBT_PLOT_EDGE_BLOCK));
-        final PlotSettings settings = PlotSettings.deserializeNBT(provider, compound.getCompound(NBT_PLOT_SETTINGS));
-        final Plot plot = new Plot(id, name, anchorPoint, size, edgeBlock, settings);
+        final Plot plot = new Plot(id, name, anchorPoint, size, edgeBlock);
         plot.buildingCount = compound.getInt(NBT_PLOT_BUILDING_COUNT);
         plot.decorationsCount = compound.getInt(NBT_PLOT_DECORATIONS_COUNT);
         return plot;

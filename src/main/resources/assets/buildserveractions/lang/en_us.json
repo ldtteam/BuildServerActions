@@ -38,6 +38,9 @@
   "com.ldtteam.buildserveractions.commands.plot.teleport.not_found": "Plot #%s not found in direction %s.",
   "com.ldtteam.buildserveractions.commands.plot.teleport.no_entity": "This command must be executed by an entity",
 
+  "com.ldtteam.buildserveractions.commands.plot.regenerate.success": "Regenerated plot #%s (%s).",
+  "com.ldtteam.buildserveractions.commands.plot.regenerate.not_found": "Plot #%s not found in direction %s.",
+
   "com.ldtteam.buildserveractions.commands.plot.setup.already_complete": "Setup has already been completed. Settings are locked.",
   "com.ldtteam.buildserveractions.commands.plot.setup.no_permission": "You do not have permission to run plot setup.",
   "com.ldtteam.buildserveractions.commands.plot.setup.started": "Starting plot setup wizard...",

@@ -27,6 +27,7 @@ public class ForgeEventHandler
         event.getDispatcher().register(new CommandPlotExtend().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotList().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotNew().build(event.getBuildContext()));
+        event.getDispatcher().register(new CommandPlotRegenerate().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotRename().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotSetup().build(event.getBuildContext()));
         event.getDispatcher().register(new CommandPlotTeleport().build(event.getBuildContext()));

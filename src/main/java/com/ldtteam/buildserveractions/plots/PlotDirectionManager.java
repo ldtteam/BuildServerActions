@@ -6,10 +6,16 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
 
@@ -136,18 +142,21 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
      */
     public int createPlot(final ServerLevel level, final String name, final PlotSize size, final BlockState edgeBlock, final PlotSettings settings)
     {
-        final int totalOffset = plots.values().stream().mapToInt(plot -> plot.size().getTotalLength() + plot.settings().getPlotRoadSpacing()).sum();
+        final int totalOffset = plots.values().stream().mapToInt(plot -> plot.size().getTotalLength() + settings.getPlotRoadSpacing()).sum();
         final BlockPos anchorPoint = new BlockPos(0, settings.getPlotYLevel(), 0).relative(direction.getDirection(), plotOffset + totalOffset);
 
         final int plotId = nextPlotId++;
-        final Plot plot = new Plot(plotId, name, anchorPoint, size, edgeBlock, settings);
+        final Plot plot = new Plot(plotId, name, anchorPoint, size, edgeBlock);
 
-        renderCenterRoad(level, plot);
-        renderBuildingsArea(level, plot);
-        renderDecorationsArea(level, plot);
+        renderCenterRoad(level, plot, settings);
+        renderBuildingsArea(level, plot, settings);
+        renderDecorationsArea(level, plot, settings);
 
-        createPlotBuildingColumns(level, plot, INITIAL_BUILDINGS_COUNT);
-        createPlotDecorationColumns(level, plot, INITIAL_DECORATIONS_COUNT);
+        createPlotBuildingColumns(level, plot, INITIAL_BUILDINGS_COUNT, settings);
+        createPlotDecorationColumns(level, plot, INITIAL_DECORATIONS_COUNT, settings);
+
+        // Render title board last so it overlays any edge blocks from roads
+        renderTitleBoard(level, plot, settings);
 
         plots.put(plotId, plot);
         return plotId;
@@ -159,17 +168,18 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
      * @param level      the server level containing the plot.
      * @param plotId     the ID of the plot to extend.
      * @param extendType the type of extension to apply.
+     * @param settings   the plot settings to use for rendering.
      */
-    public void extendPlot(final ServerLevel level, final int plotId, final PlotExtendType extendType)
+    public void extendPlot(final ServerLevel level, final int plotId, final PlotExtendType extendType, final PlotSettings settings)
     {
         final Plot plot = plots.get(plotId);
         if (extendType.equals(PlotExtendType.BUILDINGS))
         {
-            createPlotBuildingColumns(level, plot, EXTEND_BUILDINGS_COUNT);
+            createPlotBuildingColumns(level, plot, EXTEND_BUILDINGS_COUNT, settings);
         }
         else if (extendType.equals(PlotExtendType.DECORATIONS))
         {
-            createPlotDecorationColumns(level, plot, EXTEND_DECORATIONS_COUNT);
+            createPlotDecorationColumns(level, plot, EXTEND_DECORATIONS_COUNT, settings);
         }
     }
 
@@ -192,18 +202,58 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     }
 
     /**
+     * Regenerates an existing plot by redrawing all its sections.
+     *
+     * @param level    the server level containing the plot.
+     * @param plotId   the ID of the plot to regenerate.
+     * @param settings the plot settings to use for rendering.
+     * @return true if the plot was found and regenerated, false if the plot was not found.
+     */
+    public boolean regeneratePlot(final ServerLevel level, final int plotId, final PlotSettings settings)
+    {
+        final Plot plot = plots.get(plotId);
+        if (plot == null)
+        {
+            return false;
+        }
+
+        // Render the base plot areas
+        renderCenterRoad(level, plot, settings);
+        renderBuildingsArea(level, plot, settings);
+        renderDecorationsArea(level, plot, settings);
+
+        // Render all existing building columns
+        for (int i = 0; i < plot.getBuildingCount(); ++i)
+        {
+            renderBuildingsAreaColumn(level, plot, i, settings);
+        }
+
+        // Render all existing decoration columns
+        for (int i = 0; i < plot.getDecorationsCount(); ++i)
+        {
+            renderDecorationsAreaColumn(level, plot, i, settings);
+        }
+
+        // Render title board last so it overlays any edge blocks from roads
+        renderTitleBoard(level, plot, settings);
+
+        return true;
+    }
+
+    /**
      * Creates multiple building columns for a plot and renders them in the world.
      *
      * @param level         the server level to render in.
      * @param plot          the plot to add buildings to.
      * @param buildingCount the number of building columns to create.
+     * @param settings      the plot settings to use for rendering.
      */
-    private void createPlotBuildingColumns(final ServerLevel level, final Plot plot, final int buildingCount)
+    private void createPlotBuildingColumns(final ServerLevel level, final Plot plot, final int buildingCount, final PlotSettings settings)
     {
         for (int i = 0; i < buildingCount; ++i)
         {
             final int columnIndex = plot.addBuilding();
-            renderBuildingsAreaColumn(level, plot, columnIndex);
+            renderBuildingsAreaColumn(level, plot, columnIndex, settings);
         }
     }
 
@@ -213,13 +263,14 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
      * @param level           the server level to render in.
      * @param plot            the plot to add decorations to.
      * @param decorationCount the number of decoration columns to create.
+     * @param settings        the plot settings to use for rendering.
      */
-    private void createPlotDecorationColumns(final ServerLevel level, final Plot plot, final int decorationCount)
+    private void createPlotDecorationColumns(final ServerLevel level, final Plot plot, final int decorationCount, final PlotSettings settings)
     {
         for (int i = 0; i < decorationCount; ++i)
         {
             final int columnIndex = plot.addDecoration();
-            renderDecorationsAreaColumn(level, plot, columnIndex);
+            renderDecorationsAreaColumn(level, plot, columnIndex, settings);
         }
     }
 
@@ -278,33 +329,35 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     /**
      * Renders the center road for a plot.
      *
-     * @param level the server level to render in.
-     * @param plot  the plot to render the center road for.
+     * @param level    the server level to render in.
+     * @param plot     the plot to render the center road for.
+     * @param settings the plot settings to use for rendering.
      */
-    private void renderCenterRoad(final ServerLevel level, final Plot plot)
+    private void renderCenterRoad(final ServerLevel level, final Plot plot, final PlotSettings settings)
     {
-        final BlockPos bottomLeftPos = centerRoadBottomLeft(plot).relative(direction.getDirection().getOpposite(), plot.settings().getPlotRoadSpacing());
-        final BlockPos topRightPos = centerRoadTopRight(plot).relative(direction.getDirection(), plot.settings().getPlotRoadSpacing());
+        final BlockPos bottomLeftPos = centerRoadBottomLeft(plot, settings).relative(direction.getDirection().getOpposite(), settings.getPlotRoadSpacing());
+        final BlockPos topRightPos = centerRoadTopRight(plot, settings).relative(direction.getDirection(), settings.getPlotRoadSpacing());
 
         // Draw the center road itself
-        fillArea(level, bottomLeftPos, topRightPos, plot.settings().getRoadBlock());
+        fillArea(level, bottomLeftPos, topRightPos, settings.getRoadBlock());
     }
 
     /**
      * Renders the initial buildings area edge for a plot.
      *
-     * @param level the server level to render in.
-     * @param plot  the plot to render the buildings area for.
+     * @param level    the server level to render in.
+     * @param plot     the plot to render the buildings area for.
+     * @param settings the plot settings to use for rendering.
      */
-    private void renderBuildingsArea(final ServerLevel level, final Plot plot)
+    private void renderBuildingsArea(final ServerLevel level, final Plot plot, final PlotSettings settings)
     {
-        final BlockPos bottomLeftPos = buildingsAreaBottomLeft(plot);
-        final BlockPos topLeftPos = buildingsAreaTopLeft(plot);
+        final BlockPos bottomLeftPos = buildingsAreaBottomLeft(plot, settings);
+        final BlockPos topLeftPos = buildingsAreaTopLeft(plot, settings);
 
         // Draw the edge line east of the center road (from bottom to top)
         fillArea(level, bottomLeftPos, topLeftPos, plot.edgeBlock());
 
-        renderRoads(level, plot, bottomLeftPos, bottomLeftPos, topLeftPos, topLeftPos);
+        renderRoads(level, plot, bottomLeftPos, bottomLeftPos, topLeftPos, topLeftPos, settings);
     }
 
     /**
@@ -313,21 +366,22 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
      * @param level       the server level to render in.
      * @param plot        the plot to render for.
      * @param columnIndex the index of the column to render.
+     * @param settings    the plot settings to use for rendering.
      */
-    private void renderBuildingsAreaColumn(final ServerLevel level, final Plot plot, int columnIndex)
+    private void renderBuildingsAreaColumn(final ServerLevel level, final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        final BlockPos bottomLeftPos = buildingsAreaColumnBottomLeft(plot, columnIndex);
-        final BlockPos bottomRightPos = buildingsAreaColumnBottomRight(plot, columnIndex);
-        final BlockPos topLeftPos = buildingsAreaColumnTopLeft(plot, columnIndex);
-        final BlockPos topRightPos = buildingsAreaColumnTopRight(plot, columnIndex);
+        final BlockPos bottomLeftPos = buildingsAreaColumnBottomLeft(plot, columnIndex, settings);
+        final BlockPos bottomRightPos = buildingsAreaColumnBottomRight(plot, columnIndex, settings);
+        final BlockPos topLeftPos = buildingsAreaColumnTopLeft(plot, columnIndex, settings);
+        final BlockPos topRightPos = buildingsAreaColumnTopRight(plot, columnIndex, settings);
 
-        renderRoads(level, plot, bottomLeftPos, bottomRightPos, topLeftPos, topRightPos);
+        renderRoads(level, plot, bottomLeftPos, bottomRightPos, topLeftPos, topRightPos, settings);
 
         // Draw the buildings
         for (int i = 0; i < plot.size().getPlotCount(); i++)
         {
-            final BlockPos buildingBottomLeft = buildingBottomLeft(plot, columnIndex, i);
-            final BlockPos buildingTopRight = buildingTopRight(plot, columnIndex, i);
+            final BlockPos buildingBottomLeft = buildingBottomLeft(plot, columnIndex, i, settings);
+            final BlockPos buildingTopRight = buildingTopRight(plot, columnIndex, i, settings);
             fillArea(level, buildingBottomLeft, buildingTopRight, Blocks.WHITE_CONCRETE.defaultBlockState());
         }
     }
@@ -335,18 +389,19 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     /**
      * Renders the initial decorations area edge for a plot.
      *
-     * @param level the server level to render in.
-     * @param plot  the plot to render the decorations area for.
+     * @param level    the server level to render in.
+     * @param plot     the plot to render the decorations area for.
+     * @param settings the plot settings to use for rendering.
      */
-    private void renderDecorationsArea(final ServerLevel level, final Plot plot)
+    private void renderDecorationsArea(final ServerLevel level, final Plot plot, final PlotSettings settings)
     {
-        final BlockPos bottomRightPos = decorationsAreaBottomRight(plot);
-        final BlockPos topRightPos = decorationsAreaTopRight(plot);
+        final BlockPos bottomRightPos = decorationsAreaBottomRight(plot, settings);
+        final BlockPos topRightPos = decorationsAreaTopRight(plot, settings);
 
         // Draw the edge line west of the center road (from bottom to top)
         fillArea(level, bottomRightPos, topRightPos, plot.edgeBlock());
 
-        renderRoads(level, plot, bottomRightPos, bottomRightPos, topRightPos, topRightPos);
+        renderRoads(level, plot, bottomRightPos, bottomRightPos, topRightPos, topRightPos, settings);
     }
 
     /**
@@ -355,15 +410,115 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
      * @param level       the server level to render in.
      * @param plot        the plot to render for.
      * @param columnIndex the index of the column to render.
+     * @param settings    the plot settings to use for rendering.
      */
-    private void renderDecorationsAreaColumn(final ServerLevel level, final Plot plot, int columnIndex)
+    private void renderDecorationsAreaColumn(final ServerLevel level, final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        final BlockPos bottomLeftPos = decorationsAreaColumnBottomLeft(plot, columnIndex);
-        final BlockPos bottomRightPos = decorationsAreaColumnBottomRight(plot, columnIndex);
-        final BlockPos topLeftPos = decorationsAreaColumnTopLeft(plot, columnIndex);
-        final BlockPos topRightPos = decorationsAreaColumnTopRight(plot, columnIndex);
+        final BlockPos bottomLeftPos = decorationsAreaColumnBottomLeft(plot, columnIndex, settings);
+        final BlockPos bottomRightPos = decorationsAreaColumnBottomRight(plot, columnIndex, settings);
+        final BlockPos topLeftPos = decorationsAreaColumnTopLeft(plot, columnIndex, settings);
+        final BlockPos topRightPos = decorationsAreaColumnTopRight(plot, columnIndex, settings);
 
-        renderRoads(level, plot, bottomLeftPos, bottomRightPos, topLeftPos, topRightPos);
+        renderRoads(level, plot, bottomLeftPos, bottomRightPos, topLeftPos, topRightPos, settings);
+    }
+
+    /**
+     * Renders the title board structure at the bottom-right corner of the decorations area.
+     * <p>
+     * The title board is a small structure with a sign for displaying the plot name.
+     * It includes a floor, wall with sign, and roof made of mangrove slabs.
+     *
+     * @param level    the server level to render in.
+     * @param plot     the plot to render the title board for.
+     * @param settings the plot settings to use for rendering.
+     */
+    private void renderTitleBoard(final ServerLevel level, final Plot plot, final PlotSettings settings)
+    {
+        // Title board layout (4 wide E/W × 6 long N/S):
+        // - Floor: 4×6 road blocks
+        // - Wall: 5 blocks long on the western column of the floor, 3 blocks tall
+        // - Sign: on east face of center wall block
+        // - Roof: 5×3 slabs above the wall
+        // - North edge: 1 row of edge blocks north of the floor
+        //
+        // Anchor point: SW corner of the 4×6 floor area
+
+        final BlockPos anchor = decorationsAreaBottomRight(plot, settings)
+            .east(1)                                    // 1 east from decorations edge
+            .relative(direction.getDirection(), 1);     // 1 into plot from spacer road
+
+        // Floor: 4×6 road blocks (overwrites old south edge)
+        final BlockPos floorSW = anchor.relative(direction.getDirection().getOpposite(), 1).west(4);
+        final BlockPos floorNE = anchor.relative(direction.getDirection(), 4).west(1);
+        fillArea(level, floorSW, floorNE, settings.getRoadBlock());
+
+        // North edge: 1×5 edge blocks (includes NW corner)
+        final BlockPos northEdgeStart = anchor.relative(direction.getDirection(), 5).west(5);
+        final BlockPos northEdgeEnd = anchor.relative(direction.getDirection(), 5).west(1);
+        fillArea(level, northEdgeStart, northEdgeEnd, plot.edgeBlock());
+
+        // West edge: 6×1 edge blocks (from south row to north row, 1 block west of floor)
+        final BlockPos westEdgeStart = anchor.relative(direction.getDirection().getOpposite(), 1).west(5);
+        final BlockPos westEdgeEnd = anchor.relative(direction.getDirection(), 4).west(5);
+        fillArea(level, westEdgeStart, westEdgeEnd, plot.edgeBlock());
+
+        // Wall positions (on west column of floor, 5 blocks N/S)
+        final BlockPos wallSouth = anchor.west(4);
+        final BlockPos wallNorth = anchor.relative(direction.getDirection(), 4).west(4);
+
+        // Build wall (Y+1 to Y+3)
+        for (int y = 1; y <= 3; y++)
+        {
+            // End pillars (Tuff Bricks)
+            level.setBlock(wallNorth.above(y), Blocks.TUFF_BRICKS.defaultBlockState(), Block.UPDATE_CLIENTS);
+            level.setBlock(wallSouth.above(y), Blocks.TUFF_BRICKS.defaultBlockState(), Block.UPDATE_CLIENTS);
+
+            // Middle 3 blocks
+            for (int i = 1; i <= 3; i++)
+            {
+                final BlockPos middlePos = wallNorth.relative(direction.getDirection().getOpposite(), i).above(y);
+                final BlockState block = (y == 1 || y == 3)
+                    ? Blocks.CHISELED_TUFF_BRICKS.defaultBlockState()
+                    : Blocks.CHISELED_TUFF.defaultBlockState();
+                level.setBlock(middlePos, block, Block.UPDATE_CLIENTS);
+            }
+        }
+
+        // Wall sign on east face of center block at Y+2
+        final BlockPos signPos = wallNorth.relative(direction.getDirection().getOpposite(), 2).above(2).east(1);
+        final BlockState signState = Blocks.MANGROVE_WALL_SIGN.defaultBlockState()
+            .setValue(WallSignBlock.FACING, Direction.EAST);
+        level.setBlock(signPos, signState, Block.UPDATE_CLIENTS);
+
+        // Configure the sign block entity
+        if (level.getBlockEntity(signPos) instanceof SignBlockEntity signEntity)
+        {
+            // Set the front text to white and glowing
+            SignText frontText = signEntity.getFrontText()
+                .setColor(DyeColor.WHITE)
+                .setHasGlowingText(true);
+            signEntity.setText(frontText, true);
+        }
+
+        // Roof: 5×3 slabs
+        final BlockState bottomSlab = Blocks.MANGROVE_SLAB.defaultBlockState()
+            .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, SlabType.BOTTOM);
+        final BlockState topSlab = Blocks.MANGROVE_SLAB.defaultBlockState()
+            .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, SlabType.TOP);
+
+        for (int i = 0; i < 5; i++)
+        {
+            final BlockPos rowBase = wallNorth.relative(direction.getDirection().getOpposite(), i);
+
+            // West column (behind wall): top slab at Y+3
+            level.setBlock(rowBase.west(1).above(3), topSlab, Block.UPDATE_CLIENTS);
+
+            // Middle column (on wall): bottom slab at Y+4
+            level.setBlock(rowBase.above(4), bottomSlab, Block.UPDATE_CLIENTS);
+
+            // East column (in front of wall): bottom slab at Y+4
+            level.setBlock(rowBase.east(1).above(4), bottomSlab, Block.UPDATE_CLIENTS);
+        }
     }
 
     /**
@@ -375,6 +530,7 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
      * @param bottomRightPos the bottom-right corner of the column.
      * @param topLeftPos     the top-left corner of the column.
      * @param topRightPos    the top-right corner of the column.
+     * @param settings       the plot settings to use for rendering.
      */
     private void renderRoads(
         final ServerLevel level,
@@ -382,7 +538,8 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
         final BlockPos bottomLeftPos,
         final BlockPos bottomRightPos,
         final BlockPos topLeftPos,
-        final BlockPos topRightPos)
+        final BlockPos topRightPos,
+        final PlotSettings settings)
     {
         // Draw the edge line bottom of the column
         fillArea(level, bottomLeftPos, bottomRightPos, plot.edgeBlock());
@@ -392,14 +549,14 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
         // Draw the road at the bottom of the column
         fillArea(level,
             bottomLeftPos.relative(direction.getDirection().getOpposite()),
-            bottomRightPos.relative(direction.getDirection().getOpposite(), plot.settings().getPlotRoadSpacing()),
-            plot.settings().getRoadBlock());
+            bottomRightPos.relative(direction.getDirection().getOpposite(), settings.getPlotRoadSpacing()),
+            settings.getRoadBlock());
 
         // Draw the road at the top of the column
         fillArea(level,
             topLeftPos.relative(direction.getDirection()),
-            topRightPos.relative(direction.getDirection(), plot.settings().getPlotRoadSpacing()),
-            plot.settings().getRoadBlock());
+            topRightPos.relative(direction.getDirection(), settings.getPlotRoadSpacing()),
+            settings.getRoadBlock());
     }
 
     // ========================================
@@ -425,51 +582,51 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     /**
      * Calculates the left offset from center for the center road.
      */
-    private int centerRoadLeftOffset(final Plot plot)
+    private int centerRoadLeftOffset(final PlotSettings settings)
     {
-        final int width = plot.settings().getCenterRoadSpacing();
+        final int width = settings.getCenterRoadSpacing();
         return (int) Math.floor(width / 2.0);
     }
 
     /**
      * Calculates the right offset from center for the center road.
      */
-    private int centerRoadRightOffset(final Plot plot)
+    private int centerRoadRightOffset(final PlotSettings settings)
     {
-        final int width = plot.settings().getCenterRoadSpacing();
+        final int width = settings.getCenterRoadSpacing();
         return (int) Math.ceil(width / 2.0) - 1;
     }
 
     /**
      * Gets the bottom-left corner position of the center road.
      */
-    private BlockPos centerRoadBottomLeft(final Plot plot)
+    private BlockPos centerRoadBottomLeft(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadBottomCenter(plot).west(centerRoadLeftOffset(plot));
+        return centerRoadBottomCenter(plot).west(centerRoadLeftOffset(settings));
     }
 
     /**
      * Gets the bottom-right corner position of the center road.
      */
-    private BlockPos centerRoadBottomRight(final Plot plot)
+    private BlockPos centerRoadBottomRight(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadBottomCenter(plot).east(centerRoadRightOffset(plot));
+        return centerRoadBottomCenter(plot).east(centerRoadRightOffset(settings));
     }
 
     /**
      * Gets the top-left corner position of the center road.
      */
-    private BlockPos centerRoadTopLeft(final Plot plot)
+    private BlockPos centerRoadTopLeft(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadTopCenter(plot).west(centerRoadLeftOffset(plot));
+        return centerRoadTopCenter(plot).west(centerRoadLeftOffset(settings));
     }
 
     /**
      * Gets the top-right corner position of the center road.
      */
-    private BlockPos centerRoadTopRight(final Plot plot)
+    private BlockPos centerRoadTopRight(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadTopCenter(plot).east(centerRoadRightOffset(plot));
+        return centerRoadTopCenter(plot).east(centerRoadRightOffset(settings));
     }
 
     // ========================================
@@ -479,57 +636,57 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     /**
      * Gets the bottom-left corner of the buildings area.
      */
-    private BlockPos buildingsAreaBottomLeft(final Plot plot)
+    private BlockPos buildingsAreaBottomLeft(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadBottomRight(plot).east(1);
+        return centerRoadBottomRight(plot, settings).east(1);
     }
 
     /**
      * Gets the top-left corner of the buildings area.
      */
-    private BlockPos buildingsAreaTopLeft(final Plot plot)
+    private BlockPos buildingsAreaTopLeft(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadTopRight(plot).east(1);
+        return centerRoadTopRight(plot, settings).east(1);
     }
 
     /**
      * Gets the bottom-left corner of a specific building column.
      */
-    private BlockPos buildingsAreaColumnBottomLeft(final Plot plot, int columnIndex)
+    private BlockPos buildingsAreaColumnBottomLeft(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return buildingsAreaBottomLeft(plot).east(1).east(columnIndex * (plot.size().getPlotSize() + plot.size().getPlotSpacing()));
+        return buildingsAreaBottomLeft(plot, settings).east(1).east(columnIndex * (plot.size().getPlotSize() + plot.size().getPlotSpacing()));
     }
 
     /**
      * Gets the bottom-right corner of a specific building column.
      */
-    private BlockPos buildingsAreaColumnBottomRight(final Plot plot, int columnIndex)
+    private BlockPos buildingsAreaColumnBottomRight(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return buildingsAreaColumnBottomLeft(plot, columnIndex).east(plot.size().getPlotSize() + plot.size().getPlotSpacing() - 1);
+        return buildingsAreaColumnBottomLeft(plot, columnIndex, settings).east(plot.size().getPlotSize() + plot.size().getPlotSpacing() - 1);
     }
 
     /**
      * Gets the top-left corner of a specific building column.
      */
-    private BlockPos buildingsAreaColumnTopLeft(final Plot plot, int columnIndex)
+    private BlockPos buildingsAreaColumnTopLeft(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return buildingsAreaTopLeft(plot).east(1).east(columnIndex * (plot.size().getPlotSize() + plot.size().getPlotSpacing()));
+        return buildingsAreaTopLeft(plot, settings).east(1).east(columnIndex * (plot.size().getPlotSize() + plot.size().getPlotSpacing()));
     }
 
     /**
      * Gets the top-right corner of a specific building column.
      */
-    private BlockPos buildingsAreaColumnTopRight(final Plot plot, int columnIndex)
+    private BlockPos buildingsAreaColumnTopRight(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return buildingsAreaColumnTopLeft(plot, columnIndex).east(plot.size().getPlotSize() + plot.size().getPlotSpacing() - 1);
+        return buildingsAreaColumnTopLeft(plot, columnIndex, settings).east(plot.size().getPlotSize() + plot.size().getPlotSpacing() - 1);
     }
 
     /**
      * Gets the bottom-left corner of a specific building platform.
      */
-    private BlockPos buildingBottomLeft(final Plot plot, int columnIndex, int buildingIndex)
+    private BlockPos buildingBottomLeft(final Plot plot, int columnIndex, int buildingIndex, final PlotSettings settings)
     {
-        return buildingsAreaColumnBottomLeft(plot, columnIndex).above()
+        return buildingsAreaColumnBottomLeft(plot, columnIndex, settings).above()
             .east(plot.size().getPlotSpacing())
             .relative(direction.getDirection(), plot.size().getPlotSpacing() + 1)
             .relative(direction.getDirection(), buildingIndex * (plot.size().getPlotSize() + plot.size().getPlotSpacing()));
@@ -538,9 +695,9 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     /**
      * Gets the top-right corner of a specific building platform.
      */
-    private BlockPos buildingTopRight(final Plot plot, int columnIndex, int buildingIndex)
+    private BlockPos buildingTopRight(final Plot plot, int columnIndex, int buildingIndex, final PlotSettings settings)
     {
-        return buildingBottomLeft(plot, columnIndex, buildingIndex).relative(direction.getDirection(), plot.size().getPlotSize() - 1).east(plot.size().getPlotSize() - 1);
+        return buildingBottomLeft(plot, columnIndex, buildingIndex, settings).relative(direction.getDirection(), plot.size().getPlotSize() - 1).east(plot.size().getPlotSize() - 1);
     }
 
     // ========================================
@@ -550,48 +707,48 @@ public class PlotDirectionManager implements INBTSerializable<CompoundTag>
     /**
      * Gets the bottom-right corner of the decorations area.
      */
-    private BlockPos decorationsAreaBottomRight(final Plot plot)
+    private BlockPos decorationsAreaBottomRight(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadBottomLeft(plot).west(1);
+        return centerRoadBottomLeft(plot, settings).west(1);
     }
 
     /**
      * Gets the top-right corner of the decorations area.
      */
-    private BlockPos decorationsAreaTopRight(final Plot plot)
+    private BlockPos decorationsAreaTopRight(final Plot plot, final PlotSettings settings)
     {
-        return centerRoadTopLeft(plot).west(1);
+        return centerRoadTopLeft(plot, settings).west(1);
     }
 
     /**
      * Gets the bottom-right corner of a specific decoration column.
      */
-    private BlockPos decorationsAreaColumnBottomRight(final Plot plot, int columnIndex)
+    private BlockPos decorationsAreaColumnBottomRight(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return decorationsAreaBottomRight(plot).west(1).west(columnIndex * DECORATIONS_COLUMN_WIDTH);
+        return decorationsAreaBottomRight(plot, settings).west(1).west(columnIndex * DECORATIONS_COLUMN_WIDTH);
     }
 
     /**
      * Gets the bottom-left corner of a specific decoration column.
      */
-    private BlockPos decorationsAreaColumnBottomLeft(final Plot plot, int columnIndex)
+    private BlockPos decorationsAreaColumnBottomLeft(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return decorationsAreaColumnBottomRight(plot, columnIndex).west(DECORATIONS_COLUMN_WIDTH - 1);
+        return decorationsAreaColumnBottomRight(plot, columnIndex, settings).west(DECORATIONS_COLUMN_WIDTH - 1);
     }
 
     /**
      * Gets the top-right corner of a specific decoration column.
      */
-    private BlockPos decorationsAreaColumnTopRight(final Plot plot, int columnIndex)
+    private BlockPos decorationsAreaColumnTopRight(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return decorationsAreaTopRight(plot).west(1).west(columnIndex * DECORATIONS_COLUMN_WIDTH);
+        return decorationsAreaTopRight(plot, settings).west(1).west(columnIndex * DECORATIONS_COLUMN_WIDTH);
     }
 
     /**
      * Gets the top-left corner of a specific decoration column.
      */
-    private BlockPos decorationsAreaColumnTopLeft(final Plot plot, int columnIndex)
+    private BlockPos decorationsAreaColumnTopLeft(final Plot plot, int columnIndex, final PlotSettings settings)
     {
-        return decorationsAreaColumnTopRight(plot, columnIndex).west(DECORATIONS_COLUMN_WIDTH - 1);
+        return decorationsAreaColumnTopRight(plot, columnIndex, settings).west(DECORATIONS_COLUMN_WIDTH - 1);
     }
 }

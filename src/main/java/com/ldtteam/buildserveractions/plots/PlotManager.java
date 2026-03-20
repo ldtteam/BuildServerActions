@@ -134,7 +134,27 @@ public final class PlotManager implements INBTSerializable<CompoundTag>
      */
     public void extendPlot(final ServerLevel level, final PlotDirection direction, final int plotId, final PlotExtendType extendType)
     {
-        plotDirectionManagers.computeIfAbsent(direction, PlotDirectionManager::new).extendPlot(level, plotId, extendType);
+        if (baseSettings != null)
+        {
+            plotDirectionManagers.computeIfAbsent(direction, PlotDirectionManager::new).extendPlot(level, plotId, extendType, baseSettings);
+        }
+    }
+
+    /**
+     * Regenerates an existing plot by redrawing all its sections.
+     *
+     * @param level     the server level containing the plot.
+     * @param direction the direction of the plot.
+     * @param plotId    the ID of the plot to regenerate.
+     * @return true if the plot was found and regenerated, false otherwise.
+     */
+    public boolean regeneratePlot(final ServerLevel level, final PlotDirection direction, final int plotId)
+    {
+        if (baseSettings == null)
+        {
+            return false;
+        }
+        return plotDirectionManagers.computeIfAbsent(direction, PlotDirectionManager::new).regeneratePlot(level, plotId, baseSettings);
     }
 
     /**

@@ -49,6 +49,9 @@ public class TranslationConstants
     public static final String COMMAND_PLOT_TELEPORT_NOT_FOUND = "com.ldtteam.buildserveractions.commands.plot.teleport.not_found";
     public static final String COMMAND_PLOT_TELEPORT_NO_ENTITY = "com.ldtteam.buildserveractions.commands.plot.teleport.no_entity";
 
+    public static final String COMMAND_PLOT_REGENERATE_SUCCESS   = "com.ldtteam.buildserveractions.commands.plot.regenerate.success";
+    public static final String COMMAND_PLOT_REGENERATE_NOT_FOUND = "com.ldtteam.buildserveractions.commands.plot.regenerate.not_found";
+
     // Setup command translations
     public static final String COMMAND_PLOT_SETUP_ALREADY_COMPLETE   = "com.ldtteam.buildserveractions.commands.plot.setup.already_complete";
     public static final String COMMAND_PLOT_SETUP_NO_PERMISSION      = "com.ldtteam.buildserveractions.commands.plot.setup.no_permission";

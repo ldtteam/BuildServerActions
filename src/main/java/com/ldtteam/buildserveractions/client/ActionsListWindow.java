@@ -3,7 +3,9 @@ package com.ldtteam.buildserveractions.client;
 import com.ldtteam.blockui.Loader;
 import com.ldtteam.blockui.Pane;
 import com.ldtteam.blockui.controls.AbstractTextBuilder;
+import com.ldtteam.blockui.controls.ButtonImage;
 import com.ldtteam.blockui.controls.ImageRepeatable;
+import com.ldtteam.blockui.controls.Text;
 import com.ldtteam.blockui.views.BOWindow;
 import com.ldtteam.blockui.views.ScrollingList;
 import com.ldtteam.blockui.views.ScrollingListContainer.RowSizeModifier;
@@ -21,6 +23,8 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
+import java.util.List;
 
 import static com.ldtteam.buildserveractions.constants.Constants.modId;
 
@@ -69,20 +73,21 @@ public class ActionsListWindow extends BOWindow
         this.windowPausesGame = attachedToScreen.isPauseScreen();
         this.lightbox = false;
 
-        final int widgetsInRow = Math.min(WidgetManager.getInstance().getWidgetGroupCount(), layout.getMaxGroups());
+        final int totalGroupCount = WidgetManager.getInstance().getWidgetGroupCount();
         this.widgetsInColumn = WidgetManager.getInstance().getMaxWidgetCountInGroup();
 
         final ImageRepeatable background = findPaneOfTypeByID("background", ImageRepeatable.class);
         final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
 
-        final int maxContainerWidth = widgetsInRow * WIDGET_OFFSET - WIDGET_SPACING + SCROLLBAR_WIDTH;
+        final int columnsToRender = Math.min(totalGroupCount, layout.getMaxGroups());
+        final int maxContainerWidth = columnsToRender * WIDGET_OFFSET - WIDGET_SPACING + SCROLLBAR_WIDTH;
         final int maxContainerHeight = Math.min(widgetsInColumn, layout.getMaxButtonsInGroup()) * WIDGET_OFFSET - WIDGET_SPACING;
 
-        final int pageCount = (int) Math.ceil(widgetsInRow / (double) layout.getMaxGroups());
+        final int pageCount = (int) Math.ceil(totalGroupCount / (double) layout.getMaxGroups());
 
         for (int pageId = 0; pageId < pageCount; pageId++)
         {
-            final int currentPageOffset = pageId * this.widgetsInColumn;
+            final int currentPageOffset = pageId * layout.getMaxGroups();
 
             final View pageRoot = new View();
             final ScrollingList list = (ScrollingList) Loader.createFromXMLFile2(modId("gui/actionspage.xml"), pageRoot);
@@ -109,7 +114,7 @@ public class ActionsListWindow extends BOWindow
                 @Override
                 public void updateElement(final int index, final Pane rowPane)
                 {
-                    for (int groupOffset = 0; groupOffset < widgetsInColumn; groupOffset++)
+                    for (int groupOffset = 0; groupOffset < layout.getMaxGroups(); groupOffset++)
                     {
                         final Widget widget = WidgetManager.getInstance().getWidget(currentPageOffset + groupOffset, index);
                         if (widget == null)
@@ -150,8 +155,29 @@ public class ActionsListWindow extends BOWindow
 
         screen.init(attachedToScreen.getMinecraft(), maxContainerWidth + (ROOT_MARGIN * 2), maxContainerHeight + (ROOT_MARGIN * 2) + BANNER_TOP_MARGIN);
 
+        if (pageCount > 1)
+        {
+            final int navHeight = BANNER_TOP_MARGIN - 2;
+            final int navLabelWidth = maxContainerWidth - navHeight * 2;
+
+            final ButtonImage prevBtn = findPaneOfTypeByID("page_prev", ButtonImage.class);
+            prevBtn.setSize(navHeight, navHeight);
+            prevBtn.setPosition(ROOT_MARGIN, 4);
+            prevBtn.setVisible(true);
+
+            final Text pageLabel = findPaneOfTypeByID("page_label", Text.class);
+            pageLabel.setSize(navLabelWidth, navHeight);
+            pageLabel.setPosition(ROOT_MARGIN + navHeight, 4);
+            pageLabel.setVisible(true);
+
+            final ButtonImage nextBtn = findPaneOfTypeByID("page_next", ButtonImage.class);
+            nextBtn.setSize(navHeight, navHeight);
+            nextBtn.setPosition(ROOT_MARGIN + navHeight + navLabelWidth, 4);
+            nextBtn.setVisible(true);
+        }
+
         setPosition(getPositionX(attachedToScreen, layout), getPositionY(attachedToScreen, layout));
-        onPageUpdate(0);
+        onPageUpdate(0, pageCount);
     }
 
     @Override
@@ -164,12 +190,17 @@ public class ActionsListWindow extends BOWindow
     /**
      * Switch the page to a different page.
      *
-     * @param pageId the page number (0-based).
+     * @param pageId    the page number (0-based).
+     * @param pageCount the total number of pages.
      */
-    private void onPageUpdate(final int pageId)
+    private void onPageUpdate(final int pageId, final int pageCount)
     {
         final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
         pages.setView("page" + pageId);
+
+        findPaneOfTypeByID("page_label", Text.class).setText(List.of(Component.literal((pageId + 1) + "/" + pageCount)));
+        findPaneOfTypeByID("page_prev", ButtonImage.class).setHandler(btn -> onPageUpdate((pageId - 1 + pageCount) % pageCount, pageCount));
+        findPaneOfTypeByID("page_next", ButtonImage.class).setHandler(btn -> onPageUpdate((pageId + 1) % pageCount, pageCount));
     }
 
     /**

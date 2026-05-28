@@ -130,6 +130,22 @@ public class WidgetManager
     }
 
     /**
+     * Obtain a widget by its resource location ID.
+     *
+     * @param widgetId the resource location.
+     * @return the widget, or null if not found.
+     */
+    @Nullable
+    public Widget getWidgetById(final ResourceLocation widgetId)
+    {
+        if (this.widgets == null)
+        {
+            return null;
+        }
+        return this.widgets.getValue(widgetId);
+    }
+
+    /**
      * Obtain a widget by its group and index.
      *
      * @param groupIndex the index of the group the widget is in.

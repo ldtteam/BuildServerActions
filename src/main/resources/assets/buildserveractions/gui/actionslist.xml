@@ -4,9 +4,19 @@
         type="VANILLA">
     <imagerepeat id="background" source="buildserveractions:textures/gui/background.png" textureoffset="0 0" texturesize="18 18" repeatoffset="6 6" repeatsize="6 6"/>
 
-    <buttonimage id="page_prev" pos="6 1" size="10 8" source="buildserveractions:textures/gui/arrow_left.png" highlight="buildserveractions:textures/gui/arrow_left_highlighted.png" visible="false"/>
-    <text id="page_label" pos="18 1" size="20 8" visible="false" textalign="MIDDLE"/>
-    <buttonimage id="page_next" pos="40 1" size="10 8" source="buildserveractions:textures/gui/arrow_right.png" highlight="buildserveractions:textures/gui/arrow_right_highlighted.png" visible="false"/>
+    <buttonimage id="page_prev" pos="6 4" size="10 8" source="buildserveractions:textures/gui/arrow_left.png" highlight="buildserveractions:textures/gui/arrow_left_highlighted.png" visible="false"/>
+    <text id="page_label" pos="18 4" size="20 8" visible="false" textalign="MIDDLE"/>
+    <buttonimage id="page_next" pos="40 4" size="10 8" source="buildserveractions:textures/gui/arrow_right.png" highlight="buildserveractions:textures/gui/arrow_right_highlighted.png" visible="false"/>
 
-    <switch id="pages" pos="6 16"/>
+    <view id="favorites_container" pos="6 16" size="0 20">
+        <snappinglist id="favorites_list" pos="0 0" size="0 20">
+            <view/>
+        </snappinglist>
+    </view>
+
+    <button id="favorites_toggle" pos="0 16" size="20 20"/>
+
+    <box id="separator" pos="6 40" size="0 1" color="0xFF555555"/>
+
+    <switch id="pages" pos="6 45"/>
 </window>

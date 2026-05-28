@@ -1,14 +1,11 @@
 package com.ldtteam.buildserveractions;
 
 import com.ldtteam.buildserveractions.constants.Constants;
-import com.ldtteam.buildserveractions.event.ClientModEventHandler;
+import com.ldtteam.buildserveractions.event.ForgeClientEventHandler;
 import com.ldtteam.buildserveractions.event.ForgeEventHandler;
+import com.ldtteam.buildserveractions.event.ModClientEventHandler;
 import com.ldtteam.buildserveractions.event.ModEventHandler;
-import com.ldtteam.buildserveractions.registry.ModArgumentTypes;
-import com.ldtteam.buildserveractions.registry.ModDataAttachmentTypes;
-import com.ldtteam.buildserveractions.registry.ModItems;
-import com.ldtteam.buildserveractions.registry.ModWidgetGroups;
-import com.ldtteam.buildserveractions.registry.ModWidgets;
+import com.ldtteam.buildserveractions.registry.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -32,7 +29,8 @@ public class BuildServerActions
         modBus.register(ModEventHandler.class);
         if (FMLEnvironment.dist == Dist.CLIENT)
         {
-            ClientModEventHandler.register(modBus);
+            NeoForge.EVENT_BUS.register(ForgeClientEventHandler.class);
+            modBus.register(ModClientEventHandler.class);
         }
 
         ModArgumentTypes.DEFERRED_REGISTER.register(modBus);

@@ -1,0 +1,5 @@
+<window xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" pause="false" lightbox="false"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ldtteam/BlockUI/version/main/src/main/resources/assets/blockui/gui/block_ui.xsd" type="VANILLA">
+    <image id="background" source="buildserveractions:background"/>
+    <view id="slots" pos="6 6"/>
+</window>

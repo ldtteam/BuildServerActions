@@ -2,63 +2,70 @@ package com.ldtteam.buildserveractions.client;
 
 import com.ldtteam.blockui.Loader;
 import com.ldtteam.blockui.Pane;
-import com.ldtteam.blockui.controls.AbstractTextBuilder;
-import com.ldtteam.blockui.controls.Image;
+import com.ldtteam.blockui.controls.*;
 import com.ldtteam.blockui.views.BOWindow;
-import com.ldtteam.blockui.views.ScrollingList;
+import com.ldtteam.blockui.views.Box;
+import com.ldtteam.blockui.views.ScrollingList.DataProvider;
 import com.ldtteam.blockui.views.ScrollingListContainer.RowSizeModifier;
 import com.ldtteam.blockui.views.SwitchView;
 import com.ldtteam.blockui.views.View;
+import com.ldtteam.buildserveractions.FavoritesManager;
 import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
 import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.client.button.ClockItemButton;
+import com.ldtteam.buildserveractions.client.button.FavoritePlaceholderPane;
 import com.ldtteam.buildserveractions.client.button.ItemButton;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
-import net.neoforged.neoforge.network.PacketDistributor;
 import com.ldtteam.buildserveractions.widget.Widget;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+import java.util.List;
 
 import static com.ldtteam.buildserveractions.constants.Constants.modId;
+import static com.ldtteam.buildserveractions.constants.TranslationConstants.*;
 
 /**
- * Root GUI managing the actions list.
+ * Root GUI managing the action list.
  */
 public class ActionsListWindow extends BOWindow
 {
-    /**
-     * All constant values for sizing requirements.
-     */
     private static final int ROOT_MARGIN       = 6;
     private static final int BANNER_TOP_MARGIN = 10;
     private static final int WIDGET_SIZE       = 20;
     private static final int WIDGET_SPACING    = 4;
     private static final int WIDGET_OFFSET     = WIDGET_SIZE + WIDGET_SPACING;
     private static final int SCROLLBAR_WIDTH   = 8;
+    private static final int SEPARATOR_HEIGHT  = 9;
 
-    /**
-     * The screen this window will be attached to.
-     */
     private final AbstractContainerScreen<?> attachedToScreen;
+    private final WidgetLayout               layout;
+    private final int                        widgetsInColumn;
+    private final int                        columnsToRender;
 
     /**
-     * The layout information for this screen.
+     * Whether the user is currently in favorite edit mode.
      */
-    private final WidgetLayout layout;
+    private boolean editMode = false;
 
     /**
-     * The amount of widgets allowed in a single column.
+     * The favorite scrolling list, rebuilt when favorites change.
      */
-    private final int widgetsInColumn;
+    private final SnappingScrollingList favoritesList;
 
     /**
-     * Default constructor.
+     * Cached window width for rebuilding.
+     */
+    private final int windowWidth;
+
+    /**
+     * Constructs a new action list window attached to the given container screen.
      *
-     * @param attachedToScreen the screen this window will be attached to.
-     * @param layout           the layout information for this screen.
+     * @param attachedToScreen the container screen this window is attached to.
+     * @param layout           the widget layout configuration for positioning.
      */
     public ActionsListWindow(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
@@ -69,30 +76,55 @@ public class ActionsListWindow extends BOWindow
         this.windowPausesGame = attachedToScreen.isPauseScreen();
         this.lightbox = false;
 
-        final int widgetsInRow = Math.min(WidgetManager.getInstance().getWidgetGroupCount(), layout.getMaxGroups());
+        final int totalGroupCount = WidgetManager.getInstance().getWidgetGroupCount();
         this.widgetsInColumn = WidgetManager.getInstance().getMaxWidgetCountInGroup();
+        this.columnsToRender = Math.min(totalGroupCount, layout.getMaxGroups());
 
-        final Image background = findPaneOfTypeByID("background", Image.class);
+        final int mainContainerWidth = columnsToRender * WIDGET_OFFSET - WIDGET_SPACING + SCROLLBAR_WIDTH;
+        windowWidth = mainContainerWidth + ROOT_MARGIN * 2;
+
+        final int mainContainerHeight = Math.min(widgetsInColumn, layout.getMaxButtonsInGroup()) * WIDGET_OFFSET - WIDGET_SPACING;
+        final int pageCount = (int) Math.ceil(totalGroupCount / (double) layout.getMaxGroups());
+
+        final View favoritesContainer = findPaneOfTypeByID("favorites_container", View.class);
+        favoritesContainer.setSize(mainContainerWidth, WIDGET_SIZE);
+
+        favoritesList = findPaneOfTypeByID("favorites_list", SnappingScrollingList.class);
+        favoritesList.setSize(mainContainerWidth, WIDGET_SIZE);
+        favoritesList.setMaxHeight(WIDGET_SIZE);
+        favoritesList.setRowHeight(WIDGET_OFFSET);
+        attachFavoritesDataProvider(favoritesList);
+
+        final Button toggleBtn = findPaneOfTypeByID("favorites_toggle", Button.class);
+        toggleBtn.setPosition(ROOT_MARGIN + (columnsToRender - 1) * WIDGET_OFFSET, ROOT_MARGIN + BANNER_TOP_MARGIN);
+        toggleBtn.setText(Component.literal("★"));
+        toggleBtn.setHandler(btn -> {
+            editMode = !editMode;
+            toggleBtn.setText(Component.literal(editMode ? "✓" : "★"));
+            new AbstractTextBuilder.AutomaticTooltipBuilder().append(Component.translatable(editMode ? FAVORITES_TOGGLE_EXIT : FAVORITES_TOGGLE_ENTER))
+                .hoverPane(toggleBtn)
+                .build();
+            favoritesList.refreshElementPanes();
+        });
+        new AbstractTextBuilder.AutomaticTooltipBuilder().append(Component.translatable(FAVORITES_TOGGLE_ENTER)).hoverPane(toggleBtn).build();
+
+        findPaneOfTypeByID("separator", Box.class).setSize(windowWidth - ROOT_MARGIN * 2, 1);
+
         final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
-
-        final int maxContainerWidth = widgetsInRow * WIDGET_OFFSET - WIDGET_SPACING + SCROLLBAR_WIDTH;
-        final int maxContainerHeight = Math.min(widgetsInColumn, layout.getMaxButtonsInGroup()) * WIDGET_OFFSET - WIDGET_SPACING;
-
-        final int pageCount = (int) Math.ceil(widgetsInRow / (double) layout.getMaxGroups());
 
         for (int pageId = 0; pageId < pageCount; pageId++)
         {
-            final int currentPageOffset = pageId * this.widgetsInColumn;
-
+            final int currentPageOffset = pageId * layout.getMaxGroups();
             final View pageRoot = new View();
-            final ScrollingList list = (ScrollingList) Loader.createFromXMLFile(modId("gui/actionspage.xml"), pageRoot);
+            final SnappingScrollingList list = (SnappingScrollingList) Loader.createFromXMLFile(modId("gui/widgetrow.xml"), pageRoot);
             pageRoot.setID("page" + pageId);
-            pageRoot.setSize(maxContainerWidth, maxContainerHeight);
+            pageRoot.setSize(mainContainerWidth, mainContainerHeight);
             pages.addChild(pageRoot);
 
-            list.setSize(maxContainerWidth, maxContainerHeight);
-            list.setMaxHeight(maxContainerHeight);
-            list.setDataProvider(new ScrollingList.DataProvider()
+            list.setSize(mainContainerWidth, mainContainerHeight);
+            list.setMaxHeight(mainContainerHeight);
+            list.setRowHeight(WIDGET_OFFSET);
+            list.setDataProvider(new DataProvider()
             {
                 @Override
                 public int getElementCount()
@@ -109,49 +141,221 @@ public class ActionsListWindow extends BOWindow
                 @Override
                 public void updateElement(final int index, final Pane rowPane)
                 {
-                    for (int groupOffset = 0; groupOffset < widgetsInColumn; groupOffset++)
+                    for (int groupOffset = 0; groupOffset < layout.getMaxGroups(); groupOffset++)
                     {
+                        ItemButton button = rowPane.findPaneOfTypeByID("button" + groupOffset, ItemButton.class);
+
                         final Widget widget = WidgetManager.getInstance().getWidget(currentPageOffset + groupOffset, index);
                         if (widget == null)
                         {
+                            if (button != null)
+                            {
+                                button.disable();
+                            }
                             continue;
                         }
 
-                        ItemButton button = rowPane.findPaneOfTypeByID("button" + groupOffset, ItemButton.class);
                         if (button == null)
                         {
                             button = getItemButtonInstance(widget.getIcon());
-                            button.setID("button" + groupOffset);
-                            button.setSize(WIDGET_SIZE, WIDGET_SIZE);
-                            button.setPosition(groupOffset * WIDGET_OFFSET, 0);
-                            button.setSpacing(2);
-                            button.setItem(widget.getIcon());
-                            button.setHandler(btn -> PacketDistributor.sendToServer(new WidgetTriggerMessage(widget)));
-
                             ((View) rowPane).addChild(button);
                         }
+                        button.setID("button" + groupOffset);
+                        button.enable();
+                        button.setSize(WIDGET_SIZE, WIDGET_SIZE);
+                        button.setPosition(groupOffset * WIDGET_OFFSET, 0);
+                        button.setSpacing(2);
+                        button.setItem(widget.getIcon());
 
-                        final AbstractTextBuilder.TooltipBuilder tooltipBuilder = new AbstractTextBuilder.AutomaticTooltipBuilder().append(widget.getName().apply(widget));
-
-                        final Component description = widget.getDescription().apply(widget);
-                        if (description != null && !description.equals(Component.empty()))
+                        if (editMode)
                         {
-                            tooltipBuilder.newLine().appendNL(description.copy().withStyle(ChatFormatting.GRAY));
+                            button.setHandler(btn -> onEditModeWidgetClick(widget));
                         }
-                        tooltipBuilder.hoverPane(button).build();
+                        else
+                        {
+                            button.setHandler(btn -> PacketDistributor.sendToServer(new WidgetTriggerMessage(widget)));
+                        }
+
+                        buildWidgetTooltip(widget, button);
                     }
                 }
             });
         }
 
-        setSize(maxContainerWidth + (ROOT_MARGIN * 2), maxContainerHeight + (ROOT_MARGIN * 2) + BANNER_TOP_MARGIN);
-        background.setSize(maxContainerWidth + (ROOT_MARGIN * 2), maxContainerHeight + (ROOT_MARGIN * 2) + BANNER_TOP_MARGIN);
-        pages.setSize(maxContainerWidth, maxContainerHeight);
+        applyWindowSize(mainContainerWidth, mainContainerHeight, pageCount);
 
-        screen.init(attachedToScreen.getMinecraft(), maxContainerWidth + (ROOT_MARGIN * 2), maxContainerHeight + (ROOT_MARGIN * 2) + BANNER_TOP_MARGIN);
-
+        onPageUpdate(0, pageCount);
         setPosition(getPositionX(attachedToScreen, layout), getPositionY(attachedToScreen, layout));
-        onPageUpdate(0);
+    }
+
+    private int getFavoritesRowCount()
+    {
+        final int filled = FavoritesManager.getInstance().getFilledSlotCount();
+        return filled == 0 ? 1 : (int) Math.ceil(filled / (double) (columnsToRender - 1));
+    }
+
+    private void attachFavoritesDataProvider(final SnappingScrollingList list)
+    {
+        list.setDataProvider(new DataProvider()
+        {
+            @Override
+            public int getElementCount()
+            {
+                return getFavoritesRowCount();
+            }
+
+            @Override
+            public void modifyRowSize(final int index, final RowSizeModifier modifier)
+            {
+                modifier.setHeight(index + 1 == getFavoritesRowCount() ? WIDGET_SIZE : WIDGET_OFFSET);
+            }
+
+            @Override
+            public void updateElement(final int index, final Pane rowPane)
+            {
+                final int favCols = columnsToRender - 1;
+
+                final java.util.List<Integer> filledSlots = new java.util.ArrayList<>();
+                for (int s = 0; s < FavoritesManager.SLOT_COUNT; s++)
+                {
+                    if (FavoritesManager.getInstance().getSlot(s) != null)
+                    {
+                        filledSlots.add(s);
+                    }
+                }
+
+                for (int col = 0; col < favCols; col++)
+                {
+                    final int filledIndex = index * favCols + col;
+
+                    final Integer slotIndex = filledIndex < filledSlots.size() ? filledSlots.get(filledIndex) : null;
+                    final Widget widget = slotIndex != null ? WidgetManager.getInstance().getWidgetById(FavoritesManager.getInstance().getSlot(slotIndex)) : null;
+
+                    if (widget != null)
+                    {
+                        final Pane placeholder = rowPane.findPaneOfTypeByID("favp" + col, FavoritePlaceholderPane.class);
+                        if (placeholder != null)
+                        {
+                            placeholder.setVisible(false);
+                        }
+
+                        ItemButton btn = rowPane.findPaneOfTypeByID("fav" + col, ItemButton.class);
+                        if (btn == null)
+                        {
+                            btn = getItemButtonInstance(widget.getIcon());
+                            btn.setID("fav" + col);
+                            btn.setSize(WIDGET_SIZE, WIDGET_SIZE);
+                            btn.setPosition(col * WIDGET_OFFSET, 0);
+                            btn.setSpacing(2);
+                            ((View) rowPane).addChild(btn);
+                        }
+                        btn.setVisible(true);
+                        btn.setItem(widget.getIcon());
+
+                        final int finalSlot = slotIndex;
+                        if (editMode)
+                        {
+                            btn.setHandler(b -> {
+                                FavoritesManager.getInstance().clearSlot(finalSlot);
+                                refreshFavorites();
+                            });
+                            buildWidgetTooltipWithHint(widget, btn, Component.translatable(FAVORITES_HINT_REMOVE));
+                        }
+                        else
+                        {
+                            btn.setHandler(b -> PacketDistributor.sendToServer(new WidgetTriggerMessage(widget)));
+                            buildWidgetTooltip(widget, btn);
+                        }
+                    }
+                    else
+                    {
+                        final ItemButton existing = rowPane.findPaneOfTypeByID("fav" + col, ItemButton.class);
+                        if (existing != null)
+                        {
+                            existing.setVisible(false);
+                        }
+
+                        FavoritePlaceholderPane placeholder = rowPane.findPaneOfTypeByID("favp" + col, FavoritePlaceholderPane.class);
+                        if (placeholder == null)
+                        {
+                            placeholder = new FavoritePlaceholderPane();
+                            placeholder.setID("favp" + col);
+                            placeholder.setSize(WIDGET_SIZE, WIDGET_SIZE);
+                            placeholder.setPosition(col * WIDGET_OFFSET, 0);
+                            ((View) rowPane).addChild(placeholder);
+                        }
+                        placeholder.setVisible(true);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Rebuild the favorite list in place after a slot change.
+     */
+    private void refreshFavorites()
+    {
+        favoritesList.refreshElementPanes();
+    }
+
+    /**
+     * Called in edit mode when the player clicks a widget in the main grid.
+     * If already a favorite, removes it; otherwise opens the slot popup.
+     */
+    private void onEditModeWidgetClick(final Widget widget)
+    {
+        final FavoriteSlotPopup popup = new FavoriteSlotPopup(widget, slot -> {
+            FavoritesManager.getInstance().setSlot(slot, widget.getWidgetId());
+            refreshFavorites();
+        });
+        popup.setPosition(getX(), getY() + BANNER_TOP_MARGIN);
+        popup.openAsLayer();
+    }
+
+    private void buildWidgetTooltip(final Widget widget, final Pane pane)
+    {
+        TooltipHelper.buildWidgetTooltip(widget, pane);
+    }
+
+    private void buildWidgetTooltipWithHint(final Widget widget, final Pane pane, final Component hint)
+    {
+        TooltipHelper.buildWidgetTooltip(widget, pane, hint);
+    }
+
+    private void applyWindowSize(final int mainContainerWidth, final int mainContainerHeight, final int pageCount)
+    {
+        final int totalHeight = ROOT_MARGIN * 2 + BANNER_TOP_MARGIN + WIDGET_SIZE + SEPARATOR_HEIGHT + mainContainerHeight;
+
+        final Image background = findPaneOfTypeByID("background", Image.class);
+        final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
+
+        setSize(windowWidth, totalHeight);
+        background.setSize(windowWidth, totalHeight);
+        pages.setSize(mainContainerWidth, mainContainerHeight);
+
+        screen.init(attachedToScreen.getMinecraft(), windowWidth, totalHeight);
+
+        if (pageCount > 1)
+        {
+            final int navHeight = BANNER_TOP_MARGIN - 2;
+            final int navLabelWidth = mainContainerWidth - navHeight * 2;
+
+            final ButtonImage prevBtn = findPaneOfTypeByID("page_prev", ButtonImage.class);
+            prevBtn.setSize(navHeight, navHeight);
+            prevBtn.setPosition(ROOT_MARGIN, 4);
+            prevBtn.setVisible(true);
+
+            final Text pageLabel = findPaneOfTypeByID("page_label", Text.class);
+            pageLabel.setSize(navLabelWidth, navHeight);
+            pageLabel.setPosition(ROOT_MARGIN + navHeight, 4);
+            pageLabel.setVisible(true);
+
+            final ButtonImage nextBtn = findPaneOfTypeByID("page_next", ButtonImage.class);
+            nextBtn.setSize(navHeight, navHeight);
+            nextBtn.setPosition(ROOT_MARGIN + navHeight + navLabelWidth, 4);
+            nextBtn.setVisible(true);
+        }
     }
 
     @Override
@@ -161,24 +365,16 @@ public class ActionsListWindow extends BOWindow
         setPosition(getPositionX(attachedToScreen, layout), getPositionY(attachedToScreen, layout));
     }
 
-    /**
-     * Switch the page to a different page.
-     *
-     * @param pageId the page number (0-based).
-     */
-    private void onPageUpdate(final int pageId)
+    private void onPageUpdate(final int pageId, final int pageCount)
     {
         final SwitchView pages = findPaneOfTypeByID("pages", SwitchView.class);
         pages.setView("page" + pageId);
+
+        findPaneOfTypeByID("page_label", Text.class).setText(List.of(Component.literal((pageId + 1) + "/" + pageCount)));
+        findPaneOfTypeByID("page_prev", ButtonImage.class).setHandler(btn -> onPageUpdate((pageId - 1 + pageCount) % pageCount, pageCount));
+        findPaneOfTypeByID("page_next", ButtonImage.class).setHandler(btn -> onPageUpdate((pageId + 1) % pageCount, pageCount));
     }
 
-    /**
-     * Get the X position of where to put this screen at, relative to the attached screen.
-     *
-     * @param attachedToScreen the screen this window will be attached to.
-     * @param layout           the layout information for this screen.
-     * @return the X position.
-     */
     private int getPositionX(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
         if (layout.getAlignment().isHorizontalCentered())
@@ -195,13 +391,6 @@ public class ActionsListWindow extends BOWindow
         }
     }
 
-    /**
-     * Get the Y position of where to put this screen at, relative to the attached screen.
-     *
-     * @param attachedToScreen the screen this window will be attached to.
-     * @param layout           the layout information for this screen.
-     * @return the Y position.
-     */
     private int getPositionY(final AbstractContainerScreen<?> attachedToScreen, final WidgetLayout layout)
     {
         if (layout.getAlignment().isVerticalCentered())
@@ -218,21 +407,12 @@ public class ActionsListWindow extends BOWindow
         }
     }
 
-    /**
-     * Generate the correct {@link ItemButton} class for the provided item stack.
-     *
-     * @param itemStack the item stack.
-     * @return the {@link ItemButton} instance.
-     */
     private ItemButton getItemButtonInstance(final ItemStack itemStack)
     {
         if (itemStack.is(Items.CLOCK))
         {
             return new ClockItemButton();
         }
-        else
-        {
-            return new ItemButton();
-        }
+        return new ItemButton();
     }
 }

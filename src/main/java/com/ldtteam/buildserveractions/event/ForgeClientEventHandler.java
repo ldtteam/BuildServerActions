@@ -1,19 +1,27 @@
-package com.ldtteam.buildserveractions.client;
+package com.ldtteam.buildserveractions.event;
 
 import com.ldtteam.blockui.BOScreen;
+import com.ldtteam.buildserveractions.FavoritesManager;
 import com.ldtteam.buildserveractions.LayoutManager;
 import com.ldtteam.buildserveractions.LayoutManager.WidgetLayout;
+import com.ldtteam.buildserveractions.WidgetManager;
+import com.ldtteam.buildserveractions.client.ActionsListWindow;
+import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
+import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
- * Handles all GUI events for attaching and rendering the actions list window.
+ * Handles all GUI events for attaching and rendering the action list window.
  */
-public class ActionsListGuiEventHandler
+public class ForgeClientEventHandler
 {
     /**
      * Z-level offset for rendering the attached BlockUI screen above container screen items.
@@ -22,15 +30,40 @@ public class ActionsListGuiEventHandler
      */
     private static final int ATTACHED_SCREEN_Z_OFFSET = 400;
 
-    /**
-     * Private constructor to prevent instantiation.
-     */
-    private ActionsListGuiEventHandler()
+    private ForgeClientEventHandler()
     {
     }
 
     /**
-     * Called when a screen is opened; attaches the actions list window if applicable.
+     * Called when a level loads; initializes the favorites manager on the client.
+     *
+     * @param event the level load event.
+     */
+    @SubscribeEvent
+    public static void onWorldLoad(final LevelEvent.Load event)
+    {
+        if (event.getLevel().isClientSide())
+        {
+            FavoritesManager.getInstance().load(Minecraft.getInstance().gameDirectory);
+        }
+    }
+
+    /**
+     * Called when a level unloads; clears the favorites manager state on the client.
+     *
+     * @param event the level unload event.
+     */
+    @SubscribeEvent
+    public static void onWorldUnload(final LevelEvent.Unload event)
+    {
+        if (event.getLevel().isClientSide())
+        {
+            FavoritesManager.getInstance().unload();
+        }
+    }
+
+    /**
+     * Called when a screen is opened; attaches the action list window if applicable.
      *
      * @param event the screen init event.
      */
@@ -93,6 +126,23 @@ public class ActionsListGuiEventHandler
                 if (child instanceof BOScreen attachedScreen)
                 {
                     attachedScreen.tick();
+                }
+            }
+        }
+
+        for (int i = 0; i < ModClientEventHandler.FAVORITE_SLOTS.length; i++)
+        {
+            if (ModClientEventHandler.FAVORITE_SLOTS[i].consumeClick())
+            {
+                final ResourceLocation widgetId = FavoritesManager.getInstance().getSlot(i);
+                if (widgetId == null)
+                {
+                    continue;
+                }
+                final Widget widget = WidgetManager.getInstance().getWidgetById(widgetId);
+                if (widget != null)
+                {
+                    PacketDistributor.sendToServer(new WidgetTriggerMessage(widget));
                 }
             }
         }

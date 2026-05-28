@@ -75,11 +75,19 @@ public class ItemButton extends ButtonImage
     @Override
     public final void drawSelf(final BOGuiGraphics target, final double mx, final double my)
     {
+        target.flush();
+        RenderSystem.enableDepthTest();
+
         super.drawSelf(target, mx, my);
         if (itemStack != null)
         {
+            target.flush();
+
             final PoseStack ms = target.pose();
             ms.pushPose();
+
+            RenderSystem.enableBlend();
+            RenderSystem.enableDepthTest();
 
             preRender(target, mx, my);
 

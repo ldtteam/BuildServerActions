@@ -4,6 +4,7 @@ import com.ldtteam.buildserveractions.constants.Constants;
 import com.ldtteam.buildserveractions.handlers.*;
 import com.ldtteam.buildserveractions.registry.addons.DomumWidgets;
 import com.ldtteam.buildserveractions.util.ClockItemStackUtilities;
+import com.ldtteam.buildserveractions.util.VirtualContainerLevelAccess;
 import com.ldtteam.buildserveractions.widget.Widget;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -11,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleMenuProvider;
-import com.ldtteam.buildserveractions.util.VirtualContainerLevelAccess;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.SmithingMenu;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.CraftingTableBlock;
+import net.minecraft.world.level.block.EnderChestBlock;
 import net.minecraft.world.level.block.LoomBlock;
 import net.minecraft.world.level.block.SmithingTableBlock;
 import net.neoforged.fml.ModList;
@@ -66,6 +68,7 @@ public class ModWidgets
     public static final ResourceLocation ITEM_STRUCTURE_VOID_ID       = modId("item-structure-void");
 
     public static final ResourceLocation WINDOW_CRAFTING_ID       = modId("window-crafting");
+    public static final ResourceLocation WINDOW_ECHEST_ID         = modId("window-echest");
     public static final ResourceLocation WINDOW_LOOM_ID           = modId("window-loom");
     public static final ResourceLocation WINDOW_SMITHING_TABLE_ID = modId("window-smithing-table");
 
@@ -207,6 +210,15 @@ public class ModWidgets
             .setHandler(OpenWindowWidgetCallback::handler)
             .addMetadata(WIDGET_WINDOW_MENU_PROVIDER,
                 new SimpleMenuProvider((id, inv, player) -> new CraftingMenu(id, inv, VirtualContainerLevelAccess.create(player)), CraftingTableBlock.CONTAINER_TITLE)));
+
+    public static final DeferredHolder<Widget, Widget> WINDOW_ECHEST = register(GROUP_WINDOWS_ID,
+        WINDOW_ECHEST_ID,
+        builder -> builder.setName(OpenWindowWidgetCallback::name)
+            .setDescription(OpenWindowWidgetCallback::description)
+            .setIcon(new ItemStack(Items.ENDER_CHEST))
+            .setHandler(OpenWindowWidgetCallback::handler)
+            .addMetadata(WIDGET_WINDOW_MENU_PROVIDER,
+                new SimpleMenuProvider((id, inv, player) -> ChestMenu.threeRows(id, inv, player.getEnderChestInventory()), EnderChestBlock.CONTAINER_TITLE)));
 
     public static final DeferredHolder<Widget, Widget> WINDOW_LOOM = register(GROUP_WINDOWS_ID,
         WINDOW_LOOM_ID,

@@ -8,6 +8,9 @@ import com.ldtteam.buildserveractions.WidgetManager;
 import com.ldtteam.buildserveractions.client.ActionsListWindow;
 import com.ldtteam.buildserveractions.network.WidgetTriggerMessage;
 import com.ldtteam.buildserveractions.widget.Widget;
+import com.mojang.blaze3d.platform.GlConst;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -23,13 +26,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class ForgeClientEventHandler
 {
-    /**
-     * Z-level offset for rendering the attached BlockUI screen above container screen items.
-     * Container screens render items at z-levels around 100-250, so we use 400 to ensure
-     * our tooltips and UI elements render above them.
-     */
-    private static final int ATTACHED_SCREEN_Z_OFFSET = 400;
-
     private ForgeClientEventHandler()
     {
     }
@@ -91,19 +87,23 @@ public class ForgeClientEventHandler
      * @param event the screen render event.
      */
     @SubscribeEvent
-    public static void onScreenRender(final ScreenEvent.Render.Pre event)
+    public static void onScreenRender(final ScreenEvent.Render.Post event)
     {
         // BOScreen.render() is only called when it's the main screen, not when added as a child listener.
-        // We need to manually render it. Using Render.Pre ensures we render before vanilla tooltips,
-        // so our z-offset doesn't obscure tooltip text.
-        // Push the z-level higher so our UI renders above the container screen's items.
+        // We need to manually render it here. Render.Pre is used because Render.Post causes BOScreen's
+        // shared BufferSource to corrupt already-queued vanilla tooltip geometry when BOScreen replaces
+        // the projection matrix.
         for (GuiEventListener child : event.getScreen().children())
         {
             if (child instanceof BOScreen attachedScreen)
             {
-                final var pose = event.getGuiGraphics().pose();
+                // Flush any queued vanilla draw calls before BOScreen replaces the projection matrix,
+                // so they are committed to the framebuffer with the correct transform first.
+                // Then clear the depth buffer so our UI is not clipped by depth values written by vanilla items.
+                event.getGuiGraphics().flush();
+                RenderSystem.clear(GlConst.GL_DEPTH_BUFFER_BIT, false);
+                final PoseStack pose = event.getGuiGraphics().pose();
                 pose.pushPose();
-                pose.translate(0, 0, ATTACHED_SCREEN_Z_OFFSET);
                 attachedScreen.render(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
                 pose.popPose();
             }
